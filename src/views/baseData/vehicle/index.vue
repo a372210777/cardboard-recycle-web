@@ -4,20 +4,11 @@
     <div class="head-container">
       <div v-if="crud.props.searchToggle">
         <!-- 搜索 -->
-        <label class="el-form-item-label">物料类别</label>
+        <label class="el-form-item-label">车牌号</label>
         <el-input
-          v-model="query.category"
+          v-model="query.licensePlate"
           clearable
-          placeholder="物料类别"
-          style="width: 185px;"
-          class="filter-item"
-          @keyup.enter.native="crud.toQuery"
-        />
-        <label class="el-form-item-label">物料名称</label>
-        <el-input
-          v-model="query.name"
-          clearable
-          placeholder="物料名称"
+          placeholder="车牌号"
           style="width: 185px;"
           class="filter-item"
           @keyup.enter.native="crud.toQuery"
@@ -41,18 +32,40 @@
           size="small"
           label-width="80px"
         >
-          <el-form-item label="物料类别" prop="category">
-            <el-select v-model="form.category" filterable placeholder="请选择">
+          <el-form-item label="车牌号" prop="licensePlate">
+            <el-input v-model="form.licensePlate" style="width: 370px;" />
+          </el-form-item>
+          <el-form-item label="车辆类型" prop="type">
+            <el-select v-model="form.type" filterable placeholder="请选择">
               <el-option
-                v-for="item in dict.material_category"
+                v-for="item in dict.vehicle_type"
                 :key="item.id"
                 :label="item.label"
                 :value="item.value"
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="物料名称" prop="name">
-            <el-input v-model="form.name" style="width: 370px;" />
+          <el-form-item label="司机姓名" prop="driverName">
+            <el-input v-model="form.driverName" style="width: 370px;" />
+          </el-form-item>
+          <el-form-item label="司机电话" prop="driverPhone">
+            <el-input v-model="form.driverPhone" style="width: 370px;" />
+          </el-form-item>
+          <el-form-item label="载重（吨）">
+            <el-input v-model="form.load" style="width: 370px;" />
+          </el-form-item>
+          <el-form-item label="体积">
+            <el-input v-model="form.volume" style="width: 370px;" />
+          </el-form-item>
+          <el-form-item label="车辆状态" prop="status">
+            <el-select v-model="form.status" filterable placeholder="请选择">
+              <el-option
+                v-for="item in dict.vehicle_status"
+                :key="item.id"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -75,22 +88,26 @@
         @selection-change="crud.selectionChangeHandler"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column prop="name" label="物料名称" />
-        <el-table-column prop="id" label="物料编码">
+        <el-table-column prop="id" label="自增主键ID" />
+        <el-table-column prop="licensePlate" label="车牌号" />
+        <el-table-column prop="type" label="车辆类型">
           <template slot-scope="scope">
-            {{ scope.row.id }}
+            {{ dict.label.vehicle_type[scope.row.type] }}
           </template>
         </el-table-column>
-        <el-table-column prop="category" label="物料类别">
+        <el-table-column prop="driverName" label="司机姓名" />
+        <el-table-column prop="driverPhone" label="司机电话" />
+        <el-table-column prop="load" label="载重（吨）" />
+        <el-table-column prop="volume" label="体积" />
+        <el-table-column prop="status" label="车辆状态">
           <template slot-scope="scope">
-            {{ dict.label.material_category[scope.row.category] }}
+            {{ dict.label.vehicle_status[scope.row.status] }}
           </template>
         </el-table-column>
         <el-table-column prop="createBy" label="创建人" />
         <el-table-column prop="createTime" label="创建时间" />
-        <el-table-column prop="updateTime" label="更新时间" />
         <el-table-column
-          v-if="checkPer(['admin', 'basicMaterial:edit', 'basicMaterial:del'])"
+          v-if="checkPer(['admin', 'basicVehicle:edit', 'basicVehicle:del'])"
           label="操作"
           width="150px"
           align="center"
@@ -111,7 +128,7 @@
 </template>
 
 <script>
-import crudBasicMaterial from "@/api/baseData/material";
+import crudBasicVehicle from "@/api/baseData/vehicle";
 import CRUD, { presenter, header, form, crud } from "@crud/crud";
 import rrOperation from "@crud/RR.operation";
 import crudOperation from "@crud/CRUD.operation";
@@ -120,19 +137,24 @@ import pagination from "@crud/Pagination";
 
 const defaultForm = {
   id: null,
-  category: null,
+  licensePlate: null,
+  type: null,
+  driverName: null,
+  driverPhone: null,
+  load: null,
+  volume: null,
+  status: null,
   deleted: null,
   createBy: null,
   updateBy: null,
   createTime: null,
-  updateTime: null,
-  name: null
+  updateTime: null
 };
 export default {
-  name: "BasicMaterial",
+  name: "BasicVehicle",
   components: { pagination, crudOperation, rrOperation, udOperation },
   mixins: [presenter(), header(), form(defaultForm), crud()],
-  dicts: ["material_category"],
+  dicts: ["vehicle_type", "vehicle_status"],
   cruds() {
     let optShow = {
       add: true,
@@ -143,28 +165,38 @@ export default {
     };
     return CRUD({
       optShow,
-      title: "基础数据：物料",
-      url: "api/basicMaterial",
+      title: "基础数据：车辆",
+      url: "api/basicVehicle",
       idField: "id",
       sort: "id,desc",
-      crudMethod: { ...crudBasicMaterial }
+      crudMethod: { ...crudBasicVehicle }
     });
   },
   data() {
     return {
       permission: {
-        add: ["admin", "basicMaterial:add"],
-        edit: ["admin", "basicMaterial:edit"],
-        del: ["admin", "basicMaterial:del"]
+        add: ["admin", "basicVehicle:add"],
+        edit: ["admin", "basicVehicle:edit"],
+        del: ["admin", "basicVehicle:del"]
       },
       rules: {
-        id: [{ required: true, message: "物料编码不能为空", trigger: "blur" }],
-        category: [
-          { required: true, message: "物料类别不能为空", trigger: "blur" }
+        licensePlate: [
+          { required: true, message: "车牌号不能为空", trigger: "blur" }
         ],
-        name: [{ required: true, message: "物料名称不能为空", trigger: "blur" }]
+        type: [
+          { required: true, message: "车辆类型不能为空", trigger: "blur" }
+        ],
+        driverName: [
+          { required: true, message: "司机姓名不能为空", trigger: "blur" }
+        ],
+        driverPhone: [
+          { required: true, message: "司机电话不能为空", trigger: "blur" }
+        ],
+        status: [
+          { required: true, message: "车辆状态不能为空", trigger: "blur" }
+        ]
       },
-      queryTypeOptions: [{ key: "category", display_name: "物料类别" }]
+      queryTypeOptions: [{ key: "licensePlate", display_name: "车牌号" }]
     };
   },
   methods: {

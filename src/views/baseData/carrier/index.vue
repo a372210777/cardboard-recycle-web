@@ -4,20 +4,20 @@
     <div class="head-container">
       <div v-if="crud.props.searchToggle">
         <!-- 搜索 -->
-        <label class="el-form-item-label">物料类别</label>
+        <label class="el-form-item-label">承运商名称</label>
         <el-input
-          v-model="query.category"
+          v-model="query.name"
           clearable
-          placeholder="物料类别"
+          placeholder="承运商名称"
           style="width: 185px;"
           class="filter-item"
           @keyup.enter.native="crud.toQuery"
         />
-        <label class="el-form-item-label">物料名称</label>
+        <label class="el-form-item-label">机构代码</label>
         <el-input
-          v-model="query.name"
+          v-model="query.institutionCode"
           clearable
-          placeholder="物料名称"
+          placeholder="机构代码"
           style="width: 185px;"
           class="filter-item"
           @keyup.enter.native="crud.toQuery"
@@ -41,18 +41,30 @@
           size="small"
           label-width="80px"
         >
-          <el-form-item label="物料类别" prop="category">
-            <el-select v-model="form.category" filterable placeholder="请选择">
+          <el-form-item label="承运商名称" prop="name">
+            <el-input v-model="form.name" style="width: 370px;" />
+          </el-form-item>
+          <el-form-item label="机构代码">
+            <el-input v-model="form.institutionCode" style="width: 370px;" />
+          </el-form-item>
+          <el-form-item label="承运商地址">
+            <el-input v-model="form.address" style="width: 370px;" />
+          </el-form-item>
+          <el-form-item label="联系人">
+            <el-input v-model="form.contact" style="width: 370px;" />
+          </el-form-item>
+          <el-form-item label="联系电话">
+            <el-input v-model="form.phone" style="width: 370px;" />
+          </el-form-item>
+          <el-form-item label="承运商状态" prop="status">
+            <el-select v-model="form.status" filterable placeholder="请选择">
               <el-option
-                v-for="item in dict.material_category"
+                v-for="item in dict.carrier_status"
                 :key="item.id"
                 :label="item.label"
                 :value="item.value"
               />
             </el-select>
-          </el-form-item>
-          <el-form-item label="物料名称" prop="name">
-            <el-input v-model="form.name" style="width: 370px;" />
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -75,22 +87,21 @@
         @selection-change="crud.selectionChangeHandler"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column prop="name" label="物料名称" />
-        <el-table-column prop="id" label="物料编码">
+        <el-table-column prop="id" label="承运商编码" />
+        <el-table-column prop="name" label="承运商名称" />
+        <el-table-column prop="institutionCode" label="机构代码" />
+        <el-table-column prop="address" label="承运商地址" />
+        <el-table-column prop="contact" label="联系人" />
+        <el-table-column prop="phone" label="联系电话" />
+        <el-table-column prop="status" label="承运商状态">
           <template slot-scope="scope">
-            {{ scope.row.id }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="category" label="物料类别">
-          <template slot-scope="scope">
-            {{ dict.label.material_category[scope.row.category] }}
+            {{ dict.label.carrier_status[scope.row.status] }}
           </template>
         </el-table-column>
         <el-table-column prop="createBy" label="创建人" />
         <el-table-column prop="createTime" label="创建时间" />
-        <el-table-column prop="updateTime" label="更新时间" />
         <el-table-column
-          v-if="checkPer(['admin', 'basicMaterial:edit', 'basicMaterial:del'])"
+          v-if="checkPer(['admin', 'basicCarrier:edit', 'basicCarrier:del'])"
           label="操作"
           width="150px"
           align="center"
@@ -111,7 +122,7 @@
 </template>
 
 <script>
-import crudBasicMaterial from "@/api/baseData/material";
+import crudBasicCarrier from "@/api/baseData/carrier";
 import CRUD, { presenter, header, form, crud } from "@crud/crud";
 import rrOperation from "@crud/RR.operation";
 import crudOperation from "@crud/CRUD.operation";
@@ -120,19 +131,23 @@ import pagination from "@crud/Pagination";
 
 const defaultForm = {
   id: null,
-  category: null,
+  name: null,
+  institutionCode: null,
+  address: null,
+  contact: null,
+  phone: null,
+  status: null,
   deleted: null,
   createBy: null,
   updateBy: null,
   createTime: null,
-  updateTime: null,
-  name: null
+  updateTime: null
 };
 export default {
-  name: "BasicMaterial",
+  name: "BasicCarrier",
   components: { pagination, crudOperation, rrOperation, udOperation },
   mixins: [presenter(), header(), form(defaultForm), crud()],
-  dicts: ["material_category"],
+  dicts: ["carrier_status"],
   cruds() {
     let optShow = {
       add: true,
@@ -143,28 +158,32 @@ export default {
     };
     return CRUD({
       optShow,
-      title: "基础数据：物料",
-      url: "api/basicMaterial",
+      title: "基础数据：承运商",
+      url: "api/basicCarrier",
       idField: "id",
       sort: "id,desc",
-      crudMethod: { ...crudBasicMaterial }
+      crudMethod: { ...crudBasicCarrier }
     });
   },
   data() {
     return {
       permission: {
-        add: ["admin", "basicMaterial:add"],
-        edit: ["admin", "basicMaterial:edit"],
-        del: ["admin", "basicMaterial:del"]
+        add: ["admin", "basicCarrier:add"],
+        edit: ["admin", "basicCarrier:edit"],
+        del: ["admin", "basicCarrier:del"]
       },
       rules: {
-        id: [{ required: true, message: "物料编码不能为空", trigger: "blur" }],
-        category: [
-          { required: true, message: "物料类别不能为空", trigger: "blur" }
+        name: [
+          { required: true, message: "承运商名称不能为空", trigger: "blur" }
         ],
-        name: [{ required: true, message: "物料名称不能为空", trigger: "blur" }]
+        status: [
+          { required: true, message: "承运商状态不能为空", trigger: "blur" }
+        ]
       },
-      queryTypeOptions: [{ key: "category", display_name: "物料类别" }]
+      queryTypeOptions: [
+        { key: "name", display_name: "承运商名称" },
+        { key: "institutionCode", display_name: "机构代码" }
+      ]
     };
   },
   methods: {

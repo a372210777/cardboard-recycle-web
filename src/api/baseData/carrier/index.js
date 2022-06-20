@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function add(data) {
   return request({
-    url: 'api/wmsBaseFloorInfo',
+    url: 'api/basicCarrier',
     method: 'post',
     data
   })
@@ -10,7 +10,7 @@ export function add(data) {
 
 export function del(ids) {
   return request({
-    url: 'api/wmsBaseFloorInfo/',
+    url: 'api/basicCarrier/',
     method: 'delete',
     data: ids
   })
@@ -18,7 +18,7 @@ export function del(ids) {
 
 export function edit(data) {
   return request({
-    url: 'api/wmsBaseFloorInfo',
+    url: 'api/basicCarrier',
     method: 'put',
     data
   })
