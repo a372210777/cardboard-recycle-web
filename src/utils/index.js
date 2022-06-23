@@ -413,3 +413,8 @@ export function valueToString(obj={},keys=[]){
   return obj
   
 }
+
+//生成15位随机数
+export function generateRandom(){
+  return Math.ceil(Math.random() *Math.pow(10,15)) 
+}
