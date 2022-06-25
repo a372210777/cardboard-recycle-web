@@ -1,6 +1,6 @@
 import variables from '@/assets/styles/element-variables.scss'
 import defaultSettings from '@/settings'
-const { tagsView, fixedHeader, sidebarLogo, showFooter, footerTxt, caseNumber,websiteName } = defaultSettings
+const { tagsView, fixedHeader, sidebarLogo, showFooter, footerTxt, caseNumber,websiteName,maxTableHeight } = defaultSettings
 
 const state = {
   theme: variables.theme,
@@ -11,7 +11,8 @@ const state = {
   showFooter: showFooter,
   footerTxt: footerTxt,
   caseNumber: caseNumber,
-  websiteName:websiteName
+  websiteName:websiteName,
+  maxTableHeight:maxTableHeight
 }
 
 const mutations = {

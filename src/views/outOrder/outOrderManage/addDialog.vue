@@ -4,7 +4,7 @@
       :close-on-click-modal="false"
       :visible.sync="addDialogVisible"
       width="90%"
-      title="新增"
+      title="新增出库单"
       custom-class="out-order-dialog"
     >
       <h3 class="panel-title">出库物料</h3>
@@ -73,13 +73,28 @@
         </el-form-item>
         <el-form-item label="物料" prop="material">
           <el-select
+            v-if="isPaper"
             v-model="formInline.material"
             clearable
             filterable
             placeholder="请选择"
           >
             <el-option
-              v-for="item in materialList"
+              v-for="item in paperMaterialList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+          <el-select
+            v-else
+            v-model="formInline.material"
+            clearable
+            filterable
+            placeholder="请选择"
+          >
+            <el-option
+              v-for="item in notPaperMaterialList"
               :key="item.id"
               :label="item.name"
               :value="item.id"
@@ -104,8 +119,8 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="单价" prop="price">
-          <el-input v-model="formInline.price" clearable />
+        <el-form-item label="单价" prop="unitPrice">
+          <el-input v-model="formInline.unitPrice" clearable />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input type="textArea" v-model="formInline.remark" clearable />
@@ -124,7 +139,7 @@
         <el-table ref="table" :data="addData" size="small" style="width: 100%;">
           <el-table-column prop="materialName" label="物料名称" />
           <el-table-column prop="quantity" label="数量" />
-          <el-table-column prop="price" label="单价" />
+          <el-table-column prop="unitPrice" label="单价" />
           <el-table-column prop="unit" label="单位" />
           <el-table-column prop="warehouseName" label="仓库" />
           <el-table-column prop="stockOutTime" label="出库时间" />
@@ -142,175 +157,252 @@
           </el-table-column>
         </el-table>
       </div>
-      <h3 class="panel-title">质检单</h3>
-      <div>
-        <el-form
-          ref="checkForm"
-          :model="checkForm"
-          :rules="checkFormRules"
-          size="small"
-          :inline="true"
-          label-width="80px"
-        >
-          <el-form-item label="物料" prop="material">
-            <el-select
-              v-model="checkForm.material"
-              clearable
-              filterable
-              placeholder="请选择"
-            >
-              <el-option
-                v-for="item in materialList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
+      <div v-if="isPaper">
+        <h3 class="panel-title">质检单</h3>
+        <div>
+          <el-form
+            ref="checkForm"
+            :model="checkForm"
+            :rules="checkFormRules"
+            size="small"
+            :inline="true"
+            label-width="80px"
+          >
+            <el-form-item label="物料" prop="material">
+              <el-select
+                v-if="isPaper"
+                v-model="checkForm.material"
+                clearable
+                filterable
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="item in paperMaterialList"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                />
+              </el-select>
+              <el-select
+                v-else
+                v-model="checkForm.material"
+                clearable
+                filterable
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="item in notPaperMaterialList"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="毛重" prop="grossWeight">
+              <el-input
+                placeholder="请输入"
+                v-model="checkForm.grossWeight"
+                clearable
               />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="毛重" prop="grossWeight">
-            <el-input
-              placeholder="请输入"
-              v-model="checkForm.grossWeight"
-              clearable
-            />
-          </el-form-item>
-          <el-form-item label="皮重" prop="tareWeight">
-            <el-input
-              placeholder="请输入"
-              v-model="checkForm.tareWeight"
-              clearable
-            />
-          </el-form-item>
-          <el-form-item label="净重" prop="netWeight">
-            <el-input
-              placeholder="请输入"
-              v-model="checkForm.netWeight"
-              clearable
-            />
-          </el-form-item>
-          <el-form-item label="扣重" prop="deductWeight">
-            <el-input
-              placeholder="请输入"
-              v-model="checkForm.deductWeight"
-              clearable
-            />
-          </el-form-item>
-          <el-form-item label="水分比例" prop="waterPercent">
-            <el-input
-              placeholder="请输入"
-              v-model="checkForm.waterPercent"
-              clearable
-            />
-          </el-form-item>
-          <el-form-item label="杂物比例" prop="impurityPercent">
-            <el-input
-              placeholder="请输入"
-              v-model="checkForm.impurityPercent"
-              clearable
-            />
-          </el-form-item>
-          <el-form-item label="杂纸比例" prop="incidentalPaperPercent">
-            <el-input
-              placeholder="请输入"
-              v-model="checkForm.incidentalPaperPercent"
-              clearable
-            />
-          </el-form-item>
-          <el-form-item label="综合折率" prop="totalDeductPercent">
-            <el-input
-              placeholder="请输入"
-              v-model="checkForm.totalDeductPercent"
-              clearable
-            />
-          </el-form-item>
-          <el-form-item label="折合重量" prop="warehouse">
-            <el-input
-              placeholder="请输入"
-              v-model="checkForm.price"
-              clearable
-            />
-          </el-form-item>
-          <el-form-item label="备注" prop="remark">
-            <el-input
-              placeholder="请输入"
-              v-model="checkForm.remark"
-              clearable
-            />
-          </el-form-item>
-          <el-form-item label="" prop="">
-            <el-button size="mini" type="primary" @click="addToCheckList"
-              >添加</el-button
-            >
-            <el-button size="mini" type="warning" @click="reset('checkForm')"
-              >重置</el-button
-            >
-          </el-form-item>
-        </el-form>
-        <el-table
-          ref="table"
-          :data="checkData"
-          size="small"
-          style="width: 100%;"
-        >
-          <el-table-column prop="materialName" label="物料" />
-          <el-table-column prop="grossWeight" label="毛重" />
-          <el-table-column prop="tareWeight" label="皮重" />
-          <el-table-column prop="netWeight" label="净重" />
-          <el-table-column prop="deductWeight" label="扣重" />
-          <el-table-column prop="waterPercent" label="水分比例" />
-          <el-table-column prop="impurityPercent" label="杂物比例" />
-          <el-table-column prop="incidentalPaperPercent" label="杂纸比例" />
-          <el-table-column prop="totalDeductPercent" label="综合折率" />
-          <el-table-column prop="remark" label="折合重量" />
-          <el-table-column prop="remark" label="备注" />
-          <el-table-column label="操作" width="100px" align="center">
-            <template slot-scope="scope">
+            </el-form-item>
+            <el-form-item label="皮重" prop="tareWeight">
+              <el-input
+                placeholder="请输入"
+                v-model="checkForm.tareWeight"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item label="净重" prop="netWeight">
+              <el-input
+                placeholder="请输入"
+                v-model="checkForm.netWeight"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item label="扣重" prop="deductWeight">
+              <el-input
+                placeholder="请输入"
+                v-model="checkForm.deductWeight"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item label="水分比例" prop="waterPercent">
+              <el-input
+                placeholder="请输入"
+                v-model="checkForm.waterPercent"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item label="杂物比例" prop="impurityPercent">
+              <el-input
+                placeholder="请输入"
+                v-model="checkForm.impurityPercent"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item label="杂纸比例" prop="incidentalPaperPercent">
+              <el-input
+                placeholder="请输入"
+                v-model="checkForm.incidentalPaperPercent"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item label="综合折率" prop="totalDeductPercent">
+              <el-input
+                placeholder="请输入"
+                v-model="checkForm.totalDeductPercent"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item label="折合重量" prop="actualWeight">
+              <el-input
+                placeholder="请输入"
+                v-model="checkForm.actualWeight"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item label="备注" prop="remark">
+              <el-input
+                placeholder="请输入"
+                v-model="checkForm.remark"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item label="" prop="">
+              <el-button size="mini" type="primary" @click="addToCheckList"
+                >添加</el-button
+              >
+              <el-button size="mini" type="warning" @click="reset('checkForm')"
+                >重置</el-button
+              >
               <el-button
+                v-permission="['admin', 'storage:add']"
+                class="filter-item"
                 size="mini"
                 type="primary"
-                @click="delCheckData(scope.row)"
-                >删除</el-button
-              >
-            </template>
-          </el-table-column>
-        </el-table>
-        <h3 class="panel-title">托运单</h3>
-        <el-form
-          ref="transForm"
-          :model="transForm"
-          :rules="transFormRules"
-          size="small"
-          :inline="true"
-          label-width="80px"
-        >
-          <el-form-item label="托运车数" prop="consignmentVehicles">
-            <el-input
-              placeholder="请输入"
-              v-model.number="transForm.consignmentVehicles"
-              clearable
-            />
-          </el-form-item>
-          <el-form-item label="单车价格" prop="pricePerVehicle">
-            <el-input
-              placeholder="请输入"
-              v-model="transForm.pricePerVehicle"
-              clearable
-            />
-          </el-form-item>
-          <el-form-item label="备注" prop="remark">
-            <el-input
-              placeholder="请输入"
-              v-model="checkForm.remark"
-              clearable
-            />
-          </el-form-item>
+                icon="el-icon-upload"
+                @click="uploadCheckAttach"
+                >上传质检单
+              </el-button>
+              <el-button
+                v-permission="['admin', 'storage:add']"
+                class="filter-item"
+                size="mini"
+                type="primary"
+                icon="el-icon-upload"
+                @click="uploadWeightAttach"
+                >上传称重单
+              </el-button>
+            </el-form-item>
+          </el-form>
+          <el-table
+            ref="table"
+            :data="checkData"
+            size="small"
+            style="width: 100%;"
+          >
+            <el-table-column prop="materialName" label="物料" />
+            <el-table-column prop="grossWeight" label="毛重" />
+            <el-table-column prop="tareWeight" label="皮重" />
+            <el-table-column prop="netWeight" label="净重" />
+            <el-table-column prop="deductWeight" label="扣重" />
+            <el-table-column prop="waterPercent" label="水分比例" />
+            <el-table-column prop="impurityPercent" label="杂物比例" />
+            <el-table-column prop="incidentalPaperPercent" label="杂纸比例" />
+            <el-table-column prop="totalDeductPercent" label="综合折率" />
+            <el-table-column prop="actualWeight" label="折合重量" />
+            <el-table-column label="称重单附件">
+              <template slot-scope="scope">
+                <el-popover
+                  :content="getFilePath(scope.row.weighingAttachment)"
+                  placement="top-start"
+                  title="路径"
+                  width="200"
+                  trigger="hover"
+                >
+                  <a
+                    slot="reference"
+                    :href="getFilePath(scope.row.weighingAttachment)"
+                    class="el-link--primary"
+                    style="word-break:keep-all;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color: #1890ff;font-size: 13px;"
+                    target="_blank"
+                  >
+                    {{ getFileName(scope.row.weighingAttachment) }}
+                  </a>
+                </el-popover>
+              </template>
+            </el-table-column>
+            <el-table-column label="质检单附件">
+              <template slot-scope="scope">
+                <el-popover
+                  :content="getFilePath(scope.row.attachment)"
+                  placement="top-start"
+                  title="路径"
+                  width="200"
+                  trigger="hover"
+                >
+                  <a
+                    slot="reference"
+                    :href="getFilePath(scope.row.attachment)"
+                    class="el-link--primary"
+                    style="word-break:keep-all;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color: #1890ff;font-size: 13px;"
+                    target="_blank"
+                  >
+                    {{ getFileName(scope.row.attachment) }}
+                  </a>
+                </el-popover>
+              </template>
+            </el-table-column>
+            <el-table-column prop="remark" label="备注" />
+            <el-table-column label="操作" width="100px" align="center">
+              <template slot-scope="scope">
+                <el-button
+                  size="mini"
+                  type="primary"
+                  @click="delCheckData(scope.row)"
+                  >删除</el-button
+                >
+              </template>
+            </el-table-column>
+          </el-table>
+          <h3 class="panel-title">托运单</h3>
+          <el-form
+            ref="transForm"
+            :model="transForm"
+            :rules="transFormRules"
+            size="small"
+            :inline="true"
+            label-width="80px"
+          >
+            <el-form-item label="托运车数" prop="consignmentVehicles">
+              <el-input
+                placeholder="请输入"
+                v-model.number="transForm.consignmentVehicles"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item label="单车价格" prop="pricePerVehicle">
+              <el-input
+                placeholder="请输入"
+                v-model="transForm.pricePerVehicle"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item label="备注" prop="remark">
+              <el-input
+                placeholder="请输入"
+                v-model="transForm.remark"
+                clearable
+              />
+            </el-form-item>
 
-          <el-form-item label="" prop="">
-            <el-button size="mini" type="warning" @click="reset('transForm')"
-              >重置</el-button
-            >
-          </el-form-item>
-        </el-form>
+            <el-form-item label="" prop="">
+              <el-button size="mini" type="warning" @click="reset('transForm')"
+                >重置</el-button
+              >
+            </el-form-item>
+          </el-form>
+        </div>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button type="text" @click="addDialogVisible = false"
@@ -321,6 +413,14 @@
         >
       </div>
     </el-dialog>
+    <uploadFile
+      @success="uploadCheckSuccess"
+      ref="uploadCheckFile"
+    ></uploadFile>
+    <uploadFile
+      @success="uploadWeightSuccess"
+      ref="uploadWeightFile"
+    ></uploadFile>
   </div>
 </template>
 <script>
@@ -331,14 +431,19 @@ import {
   queryCarrier,
   queryBuyer
 } from "@/api/common";
-
+import uploadFile from "@/components/uploadFile";
 import { generateRandom, deepClone } from "@/utils/index";
+
+import { mapGetters } from "vuex";
 export default {
   name: "addDialog",
-
+  components: {
+    uploadFile
+  },
   dicts: ["unit_of_weight"],
   data() {
     return {
+      mode: "", //paper(纸类出库单),other(非纸类出库单)
       addDialogVisible: false,
       detailDialog: false,
       addData: [], //新增table物料数据
@@ -349,13 +454,12 @@ export default {
       loading: false,
       checkLoading: false,
       checkData: [], //质检单table数据
-
       formInline: {
-        buyer: "", //采购商
+        buyer: "", //采购商id
         warehouse: "", //仓库ID
-        carrier: "", //承运商
+        carrier: "", //承运商id
         stockOutTime: "", //出库时间
-        material: "", //物料ID
+        material: "", //物料id
         materialName: "",
         quantity: 0,
         price: "",
@@ -365,18 +469,22 @@ export default {
       },
       //质检单
       checkForm: {
-        material: "", //物料
+        material: "", //物料id
         grossWeight: "", //毛重
         tareWeight: "", //皮重
         netWeight: "", //净重
-        deductWeight: "", //扣重
-        impurityPercent: "", //杂物比列
-        totalDeductPercent: "", //综合折率
-        waterPercent: "", //水分比列
-        incidentalPaperPercent: "", //杂纸比例
-        weighingAttachment: "", //称重单附件
+        deductWeight: "0", //扣重
+        impurityPercent: "0", //杂物比列
+        totalDeductPercent: "0", //综合折率
+        waterPercent: "0", //水分比列
+        incidentalPaperPercent: "0", //杂纸比例
+        actualWeight: "0", //折合重量
+        weighingAttachment: {}, //称重单附件
+        attachment: {}, //质检单附件
         remark: "" //备注
       },
+      weightAttachRes: "", //称重单附件
+      checkAttachRes: "", //质检单附件
       //托运单
       transForm: {
         consignmentVehicles: "", //托运车数
@@ -406,7 +514,10 @@ export default {
           { required: true, message: "净重不能为空", trigger: "blur" }
         ],
         deductWeight: [
-          { required: false, message: "扣重不能为空", trigger: "blur" }
+          { required: true, message: "扣重不能为空", trigger: "blur" }
+        ],
+        actualWeight: [
+          { required: true, message: "折合重量不能为空", trigger: "blur" }
         ],
         waterPercent: [
           { required: true, message: "水分比例不能为空", trigger: "blur" }
@@ -438,7 +549,9 @@ export default {
         quantity: [
           { required: true, message: "数量不能为空", trigger: "blur" }
         ],
-        price: [{ required: true, message: "单价不能为空", trigger: "blur" }],
+        unitPrice: [
+          { required: true, message: "单价不能为空", trigger: "blur" }
+        ],
         unit: [{ required: true, message: "单位不能为空", trigger: "blur" }]
       }
     };
@@ -451,6 +564,28 @@ export default {
         }
       },
       immediate: true
+    }
+  },
+  computed: {
+    ...mapGetters(["baseApi", "fileUploadApi"]),
+    isPaper() {
+      return this.mode == "paper";
+    },
+    //纸张类物料
+    paperMaterialList() {
+      return (
+        this.materialList.filter(item => {
+          return item.category == "paper";
+        }) || []
+      );
+    },
+    //非纸张类物料
+    notPaperMaterialList() {
+      return (
+        this.materialList.filter(item => {
+          return item.category != "paper";
+        }) || []
+      );
     }
   },
   mounted() {
@@ -466,9 +601,6 @@ export default {
     });
     queryMaterial(params).then(res => {
       this.materialList = res.content;
-      if (this.materialList.length) {
-        this.formInline.material = this.materialList[0].id;
-      }
     });
     queryWarehouse(params).then(res => {
       this.warehouseList = res.content;
@@ -491,9 +623,35 @@ export default {
           let materialItem = this.materialList.find(
             item => item.id == this.checkForm.material
           );
+          //质检单得物料得包含再addData已添加得物料中
+          let isMaterialInAddList = false;
+          this.addData.forEach(item => {
+            if (item.material == this.checkForm.material) {
+              isMaterialInAddList = true;
+            }
+          });
+          if (!isMaterialInAddList) {
+            this.$message.warning("质检单得物料必须包含再入库物料中");
+            return;
+          }
           this.checkForm.materialName = materialItem.name;
           this.checkForm.randomId = generateRandom();
-          this.checkData.push(Object.assign({}, this.checkForm));
+          let copy = deepClone(this.checkForm);
+          if (this.checkAttachRes) {
+            copy.attachment = deepClone(this.checkAttachRes);
+          } else {
+            delete copy.attachment;
+          }
+          if (this.weightAttachRes) {
+            copy.weighingAttachment = deepClone(this.weightAttachRes);
+          } else {
+            delete copy.weighingAttachment;
+          }
+          this.checkData.push(copy);
+          this.weightAttachRes = "";
+          this.checkAttachRes = "";
+          this.checkForm.weighingAttachment = {};
+          this.checkForm.attachment = {};
         }
       });
     },
@@ -503,13 +661,36 @@ export default {
         return item.randomId != data.randomId;
       });
     },
-
-    showDialog(data = []) {
+    //上传称重单
+    uploadWeightAttach() {
+      this.$refs.uploadWeightFile.show();
+    },
+    //上传质检单
+    uploadCheckAttach() {
+      this.$refs.uploadCheckFile.show();
+    },
+    //上传质检单成功
+    uploadCheckSuccess(res) {
+      this.checkAttachRes = res;
+    },
+    //上传称重单单成功
+    uploadWeightSuccess(res) {
+      this.weightAttachRes = res;
+    },
+    getFilePath(data = {}) {
+      return this.baseApi + "/file/" + data.type + "/" + data.realName;
+    },
+    getFileName(data = {}) {
+      return data.name;
+    },
+    showDialog(mode) {
       this.addDialogVisible = true;
+      this.mode = mode;
     },
     hideDialog() {
       this.addDialogVisible = false;
     },
+    //物料添加
     addToList(data) {
       this.$refs["addForm"].validate(valid => {
         if (valid) {
@@ -525,6 +706,17 @@ export default {
           let carrierItem = this.carrierList.find(
             item => item.id == this.formInline.carrier
           );
+          //禁止重复添加相同得物料
+          let isAddSameMaterial = false;
+          this.addData.forEach(item => {
+            if (this.formInline.material == item.material) {
+              isAddSameMaterial = true;
+            }
+          });
+          if (isAddSameMaterial) {
+            this.$message.warning("已添加过该物料，如需添加请先删除");
+            return;
+          }
           this.formInline.materialName = materialItem.name;
           this.formInline.warehouseName = warehouseItem.name;
           this.formInline.buyerName = buyerItem.name;
@@ -542,7 +734,55 @@ export default {
     reset(formName) {
       this.$refs[formName].resetFields();
     },
-    save() {
+    // 非纸类保存
+    saveMetal() {
+      if (!this.addData.length) {
+        this.$message.warning("请先添加出库物料数据");
+        return;
+      }
+      this.$confirm("确定要保存数据吗？", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+        this.loading = true;
+        let firstEle = this.addData[0];
+        let submitData = {
+          stockOutTime: firstEle.stockOutTime,
+          orderItems: [],
+          buyer: {
+            id: firstEle.buyer
+          },
+          carrier: {
+            id: firstEle.carrier
+          },
+          warehouse: {
+            id: firstEle.warehouse
+          }
+        };
+        submitData.orderItems = deepClone(this.addData) || []; //入库单下的物料
+        submitData.orderItems.forEach(item => {
+          item.material = {
+            id: item.material
+          };
+        });
+        crudStockOutOrder
+          .add(submitData)
+          .then(res => {
+            this.loading = false;
+            this.addDialogVisible = false;
+            this.addData = [];
+            this.checkData = [];
+            this.$parent.crud.refresh();
+          })
+          .catch(() => {
+            this.loading = false;
+            this.addDialogVisible = false;
+          });
+      });
+    },
+    //纸类保存
+    savePaper() {
       if (!this.addData.length) {
         this.$message.warning("请先添加出库物料数据");
         return;
@@ -567,7 +807,6 @@ export default {
         this.loading = true;
         let firstEle = this.addData[0];
         let submitData = {
-          id: new Date().getTime(),
           stockOutTime: firstEle.stockOutTime,
           orderItems: [],
           buyer: {
@@ -578,13 +817,21 @@ export default {
           },
           warehouse: {
             id: firstEle.warehouse
-          }
+          },
+          waybills: []
         };
+        submitData.waybills.push(deepClone(this.transForm));
         submitData.orderItems = deepClone(this.addData) || []; //入库单下的物料
         submitData.orderItems.forEach(item => {
+          //过滤出属于该物料的质检单
+          let tempArr =
+            this.checkData.filter(ele => {
+              return ele.material == item.material;
+            }) || [];
           item.material = {
             id: item.material
           };
+          item.qualityCheckCerts = deepClone(tempArr) || [];
         });
         crudStockOutOrder
           .add(submitData)
@@ -592,7 +839,7 @@ export default {
             this.loading = false;
             this.addData = [];
             this.checkData = [];
-            this.crud.refresh();
+            this.$parent.crud.refresh();
             this.addDialogVisible = false;
           })
           .catch(() => {
@@ -600,6 +847,13 @@ export default {
             this.addDialogVisible = false;
           });
       });
+    },
+    save() {
+      if (this.isPaper) {
+        this.savePaper();
+      } else {
+        this.saveMetal();
+      }
     }
   }
 };

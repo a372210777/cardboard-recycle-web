@@ -415,6 +415,17 @@ export default {
           let supplierItem = this.supplierList.find(
             item => item.id == this.formInline.supplier
           );
+          //禁止重复添加相同得物料
+          let isAddSameMaterial = false;
+          this.addData.forEach(item => {
+            if (this.formInline.material == item.material) {
+              isAddSameMaterial = true;
+            }
+          });
+          if (isAddSameMaterial) {
+            this.$message.warning("已添加过该物料，如需添加请先删除");
+            return;
+          }
           this.formInline.materialName = materialItem.name;
           this.formInline.warehouseName = warehouseItem.name;
           this.formInline.supplierName = supplierItem.name;

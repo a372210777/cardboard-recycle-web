@@ -44,5 +44,9 @@ module.exports = {
    */
   caseNumber: '浙ICP备18005431号',
 
-  websiteName:"卓岑再生资源处理系统"
+  websiteName:"卓岑再生资源处理系统",
+  /**
+   * 最大表格高度
+   */
+  maxTableHeight:"450"
 }

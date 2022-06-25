@@ -32,8 +32,17 @@
           size="mini"
           type="primary"
           icon="el-icon-plus"
-          @click="showAddDialog"
-          >新建出库单</el-button
+          @click="showAddDialog('paper')"
+          >新建纸类出库单</el-button
+        >
+        <el-button
+          slot="left"
+          class="filter-item"
+          size="mini"
+          type="primary"
+          icon="el-icon-plus"
+          @click="showAddDialog('other')"
+          >新建金属类出库单</el-button
         >
       </crudOperation>
       <!--表单组件-->
@@ -84,6 +93,7 @@
         :data="crud.data"
         size="small"
         style="width: 100%;"
+        :maxHeight="$store.state.settings.maxTableHeight"
         @selection-change="crud.selectionChangeHandler"
       >
         <el-table-column type="selection" width="55" />
@@ -221,10 +231,10 @@ export default {
       return true;
     },
     showDetailDialog(data = {}) {
-      this.$refs.detailDialog.showDialog(data.orderItems);
+      this.$refs.detailDialog.showDialog(data);
     },
-    showAddDialog() {
-      this.$refs.addDialog.showDialog();
+    showAddDialog(mode = "paper") {
+      this.$refs.addDialog.showDialog(mode);
     }
   }
 };
