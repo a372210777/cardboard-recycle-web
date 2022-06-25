@@ -32,6 +32,7 @@
         :close-on-click-modal="false"
         :visible.sync="addDialogVisible"
         width="900px"
+        title="新增"
       >
         <el-form
           ref="addForm"
@@ -194,7 +195,12 @@
           align="center"
         >
           <template slot-scope="scope">
-            <udOperation :data="scope.row" disabledDle :permission="permission">
+            <udOperation
+              :data="scope.row"
+              disabledEdit
+              disabledDle
+              :permission="permission"
+            >
               <el-button
                 size="mini"
                 type="primary"
@@ -221,7 +227,7 @@ import crudOperation from "@crud/CRUD.operation";
 import udOperation from "@crud/UD.operation";
 import pagination from "@crud/Pagination";
 import detailDialog from "./detailDialog.vue";
-import { generateRandom } from "@/utils/index";
+import { generateRandom, deepClone } from "@/utils/index";
 
 const defaultForm = {
   id: null,
@@ -246,7 +252,15 @@ export default {
   dicts: ["unit_of_weight"],
   mixins: [presenter(), header(), form(defaultForm), crud()],
   cruds() {
+    let optShow = {
+      add: false,
+      edit: false,
+      del: false,
+      download: false,
+      reset: true
+    };
     return CRUD({
+      optShow,
       title: "入库单",
       url: "api/stockInOrder",
       idField: "id",
@@ -301,6 +315,16 @@ export default {
       queryTypeOptions: [{ key: "id", display_name: "入库单号" }]
     };
   },
+  watch: {
+    "dict.unit_of_weight": {
+      handler(val) {
+        if (val && val.length) {
+          this.formInline.unit = val[0].value;
+        }
+      },
+      immediate: true
+    }
+  },
   mounted() {
     let params = {
       page: 0,
@@ -308,12 +332,21 @@ export default {
     };
     querySupplier(params).then(res => {
       this.supplierList = res.content;
+      if (this.supplierList.length) {
+        this.formInline.supplier = this.supplierList[0].id;
+      }
     });
     queryMaterial(params).then(res => {
       this.materialList = res.content;
+      if (this.materialList.length) {
+        this.formInline.material = this.materialList[0].id;
+      }
     });
     queryWarehouse(params).then(res => {
       this.warehouseList = res.content;
+      if (this.warehouseList.length) {
+        this.formInline.warehouse = this.warehouseList[0].id;
+      }
     });
   },
   methods: {
@@ -338,13 +371,35 @@ export default {
         type: "warning"
       }).then(() => {
         this.loading = true;
+        let firstEle = this.addData[0];
+        let submitData = {
+          id: new Date().getTime(),
+          stockInTime: firstEle.stockInTime,
+          orderItems: [],
+          supplier: {
+            id: firstEle.supplier
+          },
+          warehouse: {
+            id: firstEle.warehouse
+          }
+        };
+        submitData.orderItems = deepClone(this.addData) || []; //入库单下的物料
+        submitData.orderItems.forEach(item => {
+          item.material = {
+            id: item.material
+          };
+        });
         crudStockInOrder
-          .add(this.addData)
+          .add(submitData)
           .then(res => {
             this.loading = false;
+            this.addData = [];
+            this.crud.refresh();
+            this.addDialogVisible = false;
           })
           .catch(() => {
             this.loading = false;
+            this.addDialogVisible = false;
           });
       });
     },
@@ -357,7 +412,7 @@ export default {
           let materialItem = this.materialList.find(
             item => item.id == this.formInline.material
           );
-          let supplierItem = this.materialList.find(
+          let supplierItem = this.supplierList.find(
             item => item.id == this.formInline.supplier
           );
           this.formInline.materialName = materialItem.name;

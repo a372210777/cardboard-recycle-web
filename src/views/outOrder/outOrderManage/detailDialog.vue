@@ -81,7 +81,6 @@ export default {
     showDialog(data = []) {
       this.dialogVisible = true;
       this.orderItems = data;
-      console.log("xxxx", data);
       this.orderItems.forEach(element => {
         element.materialName = element.material.name;
       });

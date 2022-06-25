@@ -23,5 +23,22 @@ export function queryWarehouse(params) {
     params
   })
 }
+//采购商
+export function queryBuyer(params) {
+  return request({
+    url: 'api/basicBuyer',
+    method: 'get',
+    params
+  })
+}
+//承运商
+export function queryCarrier(params) {
+  return request({
+    url: 'api/basicCarrier',
+    method: 'get',
+    params
+  })
+}
 
-export default { querySupplier, queryMaterial, queryWarehouse }
+
+export default { querySupplier, queryMaterial, queryWarehouse,queryBuyer,queryCarrier }
