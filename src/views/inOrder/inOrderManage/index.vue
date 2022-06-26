@@ -198,7 +198,6 @@
             <udOperation
               :data="scope.row"
               disabledEdit
-              disabledDle
               :permission="permission"
             >
               <el-button
@@ -227,7 +226,7 @@ import crudOperation from "@crud/CRUD.operation";
 import udOperation from "@crud/UD.operation";
 import pagination from "@crud/Pagination";
 import detailDialog from "./detailDialog.vue";
-import { generateRandom, deepClone } from "@/utils/index";
+import { generateRandom, deepClone, dateFormat } from "@/utils/index";
 
 const defaultForm = {
   id: null,
@@ -255,7 +254,7 @@ export default {
     let optShow = {
       add: false,
       edit: false,
-      del: false,
+      del: true,
       download: false,
       reset: true
     };
@@ -269,6 +268,17 @@ export default {
     });
   },
   data() {
+    let checkNumber = (rule, value, callback) => {
+      if (value && value.trim()) {
+        if (!/^[0-9]+(.[0-9]+)?$/.test(value)) {
+          callback(new Error("仅限输入数字"));
+        } else {
+          callback();
+        }
+      } else {
+        callback();
+      }
+    };
     return {
       addDialogVisible: false,
       detailDialog: false,
@@ -289,7 +299,7 @@ export default {
         supplier: "", //供应商ID
         supplierName: "",
         remark: "",
-        stockInTime: "", //入库时间
+        stockInTime: dateFormat(new Date(), "yyyy-MM-dd"), //入库时间
         warehouse: "", //仓库ID
         warehouseName: "",
         unit: ""
@@ -308,7 +318,8 @@ export default {
           { required: true, message: "物料不能为空", trigger: "blur" }
         ],
         quantity: [
-          { required: true, message: "数量不能为空", trigger: "blur" }
+          { required: true, message: "数量不能为空", trigger: "blur" },
+          { required: true, validator: checkNumber, trigger: "blur" }
         ],
         unit: [{ required: true, message: "单位不能为空", trigger: "blur" }]
       },

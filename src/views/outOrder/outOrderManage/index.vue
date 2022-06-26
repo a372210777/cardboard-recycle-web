@@ -124,7 +124,6 @@
         >
           <template slot-scope="scope">
             <udOperation
-              disabledDle
               disabledEdit
               :data="scope.row"
               :permission="permission"

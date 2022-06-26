@@ -87,10 +87,14 @@ export default {
       return isLt2M;
     },
     handleSuccess(response, file, fileList) {
-      this.$message.success("上传成功");
-      console.log("上传成功", response);
+      this.$notify({
+        title: "上传成功",
+        type: "success",
+        duration: 2500
+      });
       this.$emit("success", response);
       this.$refs.upload.clearFiles();
+      this.hide();
     },
     // 监听上传失败
     handleError(e, file, fileList) {

@@ -268,7 +268,7 @@
                 clearable
               />
             </el-form-item>
-            <el-form-item label="" prop="">
+            <el-row type="flex" justify="center">
               <el-button size="mini" type="primary" @click="addToCheckList"
                 >添加</el-button
               >
@@ -284,6 +284,11 @@
                 @click="uploadCheckAttach"
                 >上传质检单
               </el-button>
+              <fileIcon
+                v-if="!isEmptyObj(checkAttachRes)"
+                :file="checkAttachRes"
+                @removeFile="removeCheckAttach"
+              ></fileIcon>
               <el-button
                 v-permission="['admin', 'storage:add']"
                 class="filter-item"
@@ -293,7 +298,12 @@
                 @click="uploadWeightAttach"
                 >上传称重单
               </el-button>
-            </el-form-item>
+              <fileIcon
+                v-if="!isEmptyObj(weightAttachRes)"
+                :file="weightAttachRes"
+                @removeFile="removeWeightAttach"
+              ></fileIcon>
+            </el-row>
           </el-form>
           <el-table
             ref="table"
@@ -432,16 +442,33 @@ import {
   queryBuyer
 } from "@/api/common";
 import uploadFile from "@/components/uploadFile";
-import { generateRandom, deepClone } from "@/utils/index";
-
+import {
+  generateRandom,
+  deepClone,
+  isEmptyObj,
+  dateFormat
+} from "@/utils/index";
+import fileIcon from "@/components/uploadFile/fileIcon";
 import { mapGetters } from "vuex";
 export default {
   name: "addDialog",
   components: {
-    uploadFile
+    uploadFile,
+    fileIcon
   },
   dicts: ["unit_of_weight"],
   data() {
+    let checkNumber = (rule, value, callback) => {
+      if (value && value.trim()) {
+        if (!/^[0-9]+(.[0-9]+)?$/.test(value)) {
+          callback(new Error("仅限输入数字"));
+        } else {
+          callback();
+        }
+      } else {
+        callback();
+      }
+    };
     return {
       mode: "", //paper(纸类出库单),other(非纸类出库单)
       addDialogVisible: false,
@@ -453,12 +480,13 @@ export default {
       carrierList: [], //承运商列表
       loading: false,
       checkLoading: false,
+      isEmptyObj: isEmptyObj,
       checkData: [], //质检单table数据
       formInline: {
         buyer: "", //采购商id
         warehouse: "", //仓库ID
         carrier: "", //承运商id
-        stockOutTime: "", //出库时间
+        stockOutTime: dateFormat(new Date(), "yyyy-MM-dd"), //出库时间
         material: "", //物料id
         materialName: "",
         quantity: 0,
@@ -494,10 +522,11 @@ export default {
       transFormRules: {
         consignmentVehicles: [
           { required: true, message: "托运车数不能为空", trigger: "blur" },
-          { type: "number", message: "托运车数必须为数字值" }
+          { required: true, validator: checkNumber, trigger: "blur" }
         ],
         pricePerVehicle: [
-          { required: true, message: "单车价格不能为空", trigger: "blur" }
+          { required: true, message: "单车价格不能为空", trigger: "blur" },
+          { required: true, validator: checkNumber, trigger: "blur" }
         ]
       },
       checkFormRules: {
@@ -505,31 +534,40 @@ export default {
           { required: true, message: "物料不能为空", trigger: "blur" }
         ],
         grossWeight: [
-          { required: true, message: "毛重不能为空", trigger: "blur" }
+          { required: true, message: "毛重不能为空", trigger: "blur" },
+          { required: true, validator: checkNumber, trigger: "blur" }
         ],
         tareWeight: [
-          { required: true, message: "皮重不能为空", trigger: "blur" }
+          { required: true, message: "皮重不能为空", trigger: "blur" },
+          { required: true, validator: checkNumber, trigger: "blur" }
         ],
         netWeight: [
-          { required: true, message: "净重不能为空", trigger: "blur" }
+          { required: true, message: "净重不能为空", trigger: "blur" },
+          { required: true, validator: checkNumber, trigger: "blur" }
         ],
         deductWeight: [
-          { required: true, message: "扣重不能为空", trigger: "blur" }
+          { required: true, message: "扣重不能为空", trigger: "blur" },
+          { required: true, validator: checkNumber, trigger: "blur" }
         ],
         actualWeight: [
-          { required: true, message: "折合重量不能为空", trigger: "blur" }
+          { required: true, message: "折合重量不能为空", trigger: "blur" },
+          { required: true, validator: checkNumber, trigger: "blur" }
         ],
         waterPercent: [
-          { required: true, message: "水分比例不能为空", trigger: "blur" }
+          { required: true, message: "水分比例不能为空", trigger: "blur" },
+          { required: true, validator: checkNumber, trigger: "blur" }
         ],
         impurityPercent: [
-          { required: true, message: "杂物比例不能为空", trigger: "blur" }
+          { required: true, message: "杂物比例不能为空", trigger: "blur" },
+          { required: true, validator: checkNumber, trigger: "blur" }
         ],
         incidentalPaperPercent: [
-          { required: true, message: "杂纸比例不能为空", trigger: "blur" }
+          { required: true, message: "杂纸比例不能为空", trigger: "blur" },
+          { required: true, validator: checkNumber, trigger: "blur" }
         ],
         totalDeductPercent: [
-          { required: true, message: "综合折率不能为空", trigger: "blur" }
+          { required: true, message: "综合折率不能为空", trigger: "blur" },
+          { required: true, validator: checkNumber, trigger: "blur" }
         ]
       },
       rules: {
@@ -547,10 +585,12 @@ export default {
           { required: true, message: "物料不能为空", trigger: "blur" }
         ],
         quantity: [
-          { required: true, message: "数量不能为空", trigger: "blur" }
+          { required: true, message: "数量不能为空", trigger: "blur" },
+          { required: true, validator: checkNumber, trigger: "blur" }
         ],
         unitPrice: [
-          { required: true, message: "单价不能为空", trigger: "blur" }
+          { required: true, message: "单价不能为空", trigger: "blur" },
+          { required: true, validator: checkNumber, trigger: "blur" }
         ],
         unit: [{ required: true, message: "单位不能为空", trigger: "blur" }]
       }
@@ -631,7 +671,11 @@ export default {
             }
           });
           if (!isMaterialInAddList) {
-            this.$message.warning("质检单得物料必须包含再入库物料中");
+            this.$notify({
+              title: "质检单得物料必须包含再入库物料中",
+              type: "error",
+              duration: 2500
+            });
             return;
           }
           this.checkForm.materialName = materialItem.name;
@@ -733,6 +777,14 @@ export default {
     },
     reset(formName) {
       this.$refs[formName].resetFields();
+    },
+    //移除质检单附件
+    removeCheckAttach() {
+      this.checkAttachRes = "";
+    },
+    //移除称重单附件
+    removeWeightAttach() {
+      this.weightAttachRes = "";
     },
     // 非纸类保存
     saveMetal() {
