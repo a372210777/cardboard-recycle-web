@@ -40,6 +40,11 @@ Vue.use(Element, {
   size: Cookies.get('size') || 'small' // set element-ui default size
 })
 
+String.prototype.trim = function ()
+{
+	return this.replace(/(^\s*)|(\s*$)/g, "");
+}
+
 Vue.config.productionTip = false
 
 new Vue({

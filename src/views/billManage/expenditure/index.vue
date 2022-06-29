@@ -28,12 +28,20 @@
           @keyup.enter.native="crud.toQuery"
         />
         <label class="el-form-item-label">开销日期</label>
-        <el-date-picker
-          v-model="query.date"
-          type="date"
+        <date-range-picker
+          v-model="query.dates"
+          valueFormat="yyyy-MM-dd"
+          class="date-item"
+        />
+
+        <!-- <el-date-picker
+          v-model="query.dates"
+          type="daterange"
+          range-separator="至"
           placeholder="选择日期时间"
+          value-format="yyyy-MM-dd"
         >
-        </el-date-picker>
+        </el-date-picker> -->
         <rrOperation :crud="crud" />
       </div>
       <!--如果想在工具栏加入更多按钮，可以使用插槽方式， slot = 'left' or 'right'-->
@@ -81,6 +89,7 @@
               type="date"
               placeholder="选择日期时间"
               style="width: 215px;"
+              value-format="yyyy-MM-dd"
             >
             </el-date-picker>
           </el-form-item>
@@ -88,6 +97,7 @@
             <el-input
               v-model="form.remark"
               type="textarea"
+              maxlength="500"
               style="width: 370px;"
               placeholder="请输入"
             />
@@ -149,6 +159,7 @@ import crudOperation from "@crud/CRUD.operation";
 import udOperation from "@crud/UD.operation";
 import pagination from "@crud/Pagination";
 
+import DateRangePicker from "@/components/DateRangePicker";
 const defaultForm = {
   id: null,
   category: null,
@@ -163,7 +174,13 @@ const defaultForm = {
 };
 export default {
   name: "DailyExpense",
-  components: { pagination, crudOperation, rrOperation, udOperation },
+  components: {
+    pagination,
+    crudOperation,
+    rrOperation,
+    udOperation,
+    DateRangePicker
+  },
   mixins: [presenter(), header(), form(defaultForm), crud()],
   dicts: ["expense_category"],
   cruds() {
@@ -177,7 +194,7 @@ export default {
   },
   data() {
     let checkNumber = (rule, value, callback) => {
-      if (value && value.trim()) {
+      if (value && String(value).trim()) {
         if (!/^[0-9]+(.[0-9]+)?$/.test(value)) {
           callback(new Error("仅限输入数字"));
         } else {

@@ -13,33 +13,29 @@
           class="filter-item"
           @keyup.enter.native="crud.toQuery"
         />
-        <label class="el-form-item-label">对账年份</label>
-        <el-input
-          v-model="query.year"
-          clearable
-          placeholder="对账年份"
-          style="width: 185px;"
-          class="filter-item"
-          @keyup.enter.native="crud.toQuery"
-        />
-        <label class="el-form-item-label">对账月份</label>
-        <el-input
-          v-model="query.month"
-          clearable
-          placeholder="对账月份"
-          style="width: 185px;"
-          class="filter-item"
-          @keyup.enter.native="crud.toQuery"
-        />
         <label class="el-form-item-label">对账时间</label>
-        <el-input
-          v-model="query.statementTime"
+        <el-date-picker
+          @change="dateChange"
+          type="month"
+          v-model="statementTime"
           clearable
-          placeholder="对账时间"
-          style="width: 185px;"
-          class="filter-item"
-          @keyup.enter.native="crud.toQuery"
-        />
+          placeholder="请选择"
+        >
+        </el-date-picker>
+        <label class="el-form-item-label">对账结果</label>
+        <el-select
+          v-model="query.statementResult"
+          filterable
+          clearable
+          placeholder="请选择"
+        >
+          <el-option
+            v-for="item in dict.statement_result"
+            :key="item.id"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
         <rrOperation :crud="crud" />
       </div>
       <!--如果想在工具栏加入更多按钮，可以使用插槽方式， slot = 'left' or 'right'-->
@@ -70,20 +66,59 @@
           size="small"
           label-width="80px"
         >
-          <el-form-item label="对账年份" prop="year">
-            <el-input v-model="form.year" style="width: 370px;" />
+          <el-form-item label="物料名称" prop="material.name">
+            <el-input
+              v-model="form.material.name"
+              filterable
+              clearable
+              disabled
+              placeholder="请选择"
+            >
+            </el-input>
           </el-form-item>
-          <el-form-item label="对账月份" prop="month">
-            <el-input v-model="form.month" style="width: 370px;" />
+          <el-form-item label="数量" prop="quantity">
+            <el-input
+              v-model="form.quantity"
+              filterable
+              clearable
+              disabled
+              placeholder="请选择"
+            >
+            </el-input>
           </el-form-item>
-          <el-form-item label="对账人">
-            <el-input v-model="form.createBy" style="width: 370px;" />
+          <el-form-item label="单价" prop="purchasePrice">
+            <el-input
+              v-model="form.purchasePrice"
+              filterable
+              clearable
+              placeholder="请选择"
+            >
+            </el-input>
           </el-form-item>
-          <el-form-item label="对账时间" prop="statementTime">
-            <el-input v-model="form.statementTime" style="width: 370px;" />
+          <el-form-item label="对账结果" prop="statementResult">
+            <el-select
+              v-model="form.statementResult"
+              filterable
+              placeholder="请选择"
+            >
+              <el-option
+                v-for="item in dict.statement_result"
+                :key="item.id"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
           </el-form-item>
-          <el-form-item label="创建时间">
-            <el-input v-model="form.createTime" style="width: 370px;" />
+          <el-form-item label="备注" prop="remark">
+            <el-input
+              v-model="form.remark"
+              filterable
+              clearable
+              placeholder="请选择"
+              type="textarea"
+              maxlength="500"
+            >
+            </el-input>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -106,12 +141,51 @@
         @selection-change="crud.selectionChangeHandler"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column prop="id" label="对账单号" />
-        <el-table-column prop="year" label="对账年份" />
-        <el-table-column prop="month" label="对账月份" />
-        <el-table-column prop="createBy" label="对账人" />
-        <el-table-column prop="statementTime" label="对账时间" />
-        <el-table-column prop="createTime" label="创建时间" />
+        <el-table-column prop="id" label="对账单号">
+          <template slot-scope="scope">
+            {{ scope.row.statement.id }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="year" label="对账时间">
+          <template slot-scope="scope">
+            {{ scope.row.statement.year + "-" + scope.row.statement.month }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="createBy" label="对账人">
+          <template slot-scope="scope">
+            {{ scope.row.statement.createBy }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="statementTime" label="对账时间">
+          <template slot-scope="scope">
+            {{ scope.row.statement.statementTime }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="" label="物料名称">
+          <template slot-scope="scope">
+            {{ scope.row.material.name }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="" label="数量">
+          <template slot-scope="scope">
+            {{ scope.row.quantity }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="" label="单价">
+          <template slot-scope="scope">
+            {{ scope.row.purchasePrice }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="" label="对账结果">
+          <template slot-scope="scope">
+            {{ dict.label.statement_result[scope.row.statementResult] }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="" label="备注">
+          <template slot-scope="scope">
+            {{ scope.row.remark }}
+          </template>
+        </el-table-column>
         <el-table-column
           v-if="checkPer(['admin', 'statement:edit', 'statement:del'])"
           label="操作"
@@ -158,11 +232,12 @@ export default {
     udOperation,
     addDialog
   },
+  dicts: ["material_category", "statement_result"],
   mixins: [presenter(), header(), form(defaultForm), crud()],
   cruds() {
     let optShow = {
       add: false,
-      edit: true,
+      edit: false,
       del: true,
       download: true,
       reset: true
@@ -178,6 +253,7 @@ export default {
   },
   data() {
     return {
+      statementTime: "", //对账时间
       permission: {
         add: ["admin", "statement:add"],
         edit: ["admin", "statement:edit"],
@@ -209,6 +285,15 @@ export default {
     },
     showDialog() {
       this.$refs.addDialog.show();
+    },
+    dateChange(val) {
+      if (val) {
+        this.query.year = new Date(val).getFullYear();
+        this.query.month = new Date(val).getMonth() + 1;
+      } else {
+        this.query.year = null;
+        this.query.month = null;
+      }
     }
   }
 };

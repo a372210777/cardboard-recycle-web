@@ -46,7 +46,7 @@
             :value="item.value"
           />
         </el-select>
-        <label class="el-form-item-label">日期</label>
+        <label class="el-form-item-label">统计日期</label>
         <el-date-picker
           v-model="date"
           type="daterange"
@@ -54,6 +54,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           value-format="yyyy-MM-dd"
+          unlink-panels
           @change="dateChange"
         >
         </el-date-picker>
@@ -113,10 +114,18 @@
         style="width: 100%;margin-top:20px"
         :maxHeight="$store.state.settings.maxTableHeight"
       >
-        <el-table-column prop="orderType" label="出入库" />
+        <el-table-column prop="orderType" label="出入库">
+          <template slot-scope="scope">
+            {{ getTypeName() }}
+          </template>
+        </el-table-column>
         <el-table-column prop="warehouseName" label="仓库" />
         <el-table-column prop="materialName" label="物料" />
-        <el-table-column prop="materialCategory" label="物料类别" />
+        <el-table-column prop="materialCategory" label="物料类别">
+          <template slot-scope="scope">
+            {{ dict.label.material_category[scope.row.materialCategory] }}
+          </template>
+        </el-table-column>
         <el-table-column prop="quantity" label="数量" />
         <el-table-column prop="date" label="日期" />
       </el-table>
@@ -212,12 +221,17 @@ export default {
         this.form.endDate = val[1];
       }
     },
+    getTypeName() {
+      let ele = this.orderTypeList.find(item => {
+        return item.value == this.form.orderType;
+      });
+      return ele ? ele.label : "";
+    },
     queryData() {
       this.loading = true;
       inAndOutOrderStatics(this.form)
         .then(res => {
-          console.log(res);
-          this.tableData = res.content;
+          this.tableData = res;
           this.loading = false;
         })
         .catch(() => {

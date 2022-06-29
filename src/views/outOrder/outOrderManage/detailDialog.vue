@@ -25,6 +25,7 @@
           </el-table-column>
           <el-table-column prop="quantity" label="数量" />
           <el-table-column prop="unitPrice" label="单价" />
+          <el-table-column prop="unitPrice" label="折后单价" />
           <el-table-column prop="unit" label="单位" />
           <el-table-column prop="remark" label="备注" />
         </el-table>

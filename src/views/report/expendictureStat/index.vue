@@ -63,7 +63,7 @@
             {{ dict.label.expense_category[scope.row.category] }}
           </template>
         </el-table-column>
-        <el-table-column prop="money" label="开销金额" />
+        <el-table-column prop="money" label="开销总金额" />
         <el-table-column prop="date" label="开销日期" />
       </el-table>
     </div>
@@ -117,6 +117,7 @@ export default {
       expenseStatics(this.form)
         .then(res => {
           console.log(res);
+          this.tableData = res;
           this.loading = false;
         })
         .catch(() => {

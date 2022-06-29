@@ -102,7 +102,11 @@
           </el-select>
         </el-form-item>
         <el-form-item label="数量" prop="quantity">
-          <el-input v-model="formInline.quantity" clearable />
+          <el-input
+            v-model="formInline.quantity"
+            clearable
+            placeholder="请输入"
+          />
         </el-form-item>
         <el-form-item label="单位" prop="unit">
           <el-select
@@ -120,10 +124,20 @@
           </el-select>
         </el-form-item>
         <el-form-item label="单价" prop="unitPrice">
-          <el-input v-model="formInline.unitPrice" clearable />
+          <el-input
+            v-model="formInline.unitPrice"
+            clearable
+            placeholder="请输入"
+          />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
-          <el-input type="textArea" v-model="formInline.remark" clearable />
+          <el-input
+            type="textarea"
+            maxlength="500"
+            v-model="formInline.remark"
+            clearable
+            placeholder="请输入"
+          />
         </el-form-item>
         <el-form-item label="" prop="">
           <el-button size="mini" type="primary" @click="addToList"
@@ -266,6 +280,8 @@
                 placeholder="请输入"
                 v-model="checkForm.remark"
                 clearable
+                type="textarea"
+                maxlength="500"
               />
             </el-form-item>
             <el-row type="flex" justify="center">
@@ -403,6 +419,8 @@
                 placeholder="请输入"
                 v-model="transForm.remark"
                 clearable
+                type="textarea"
+                maxlength="500"
               />
             </el-form-item>
 
@@ -459,7 +477,7 @@ export default {
   dicts: ["unit_of_weight"],
   data() {
     let checkNumber = (rule, value, callback) => {
-      if (value && value.trim()) {
+      if (value && String(value).trim()) {
         if (!/^[0-9]+(.[0-9]+)?$/.test(value)) {
           callback(new Error("仅限输入数字"));
         } else {

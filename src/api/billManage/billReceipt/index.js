@@ -24,6 +24,17 @@ export function edit(data) {
   })
 }
 
+export function queryData(params) {
+  return request({
+    url: 'api/statement',
+    method: 'get',
+    params
+  })
+}
+
+
+
+
 export function staticsByMonth(params) {
   return request({
     url: '/api/statement/add',
@@ -35,4 +46,4 @@ export function staticsByMonth(params) {
 
 
 
-export default { add, edit, del,staticsByMonth }
+export default { add, edit, del,staticsByMonth,queryData }

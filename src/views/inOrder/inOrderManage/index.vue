@@ -116,7 +116,12 @@
             </el-select>
           </el-form-item>
           <el-form-item label="备注" prop="remark">
-            <el-input v-model="formInline.remark" />
+            <el-input
+              v-model="formInline.remark"
+              type="textarea"
+              maxlength="500"
+              placeholder="请输入"
+            />
           </el-form-item>
           <el-form-item label="" prop="">
             <el-button size="mini" type="primary" @click="addToList"
@@ -269,7 +274,7 @@ export default {
   },
   data() {
     let checkNumber = (rule, value, callback) => {
-      if (value && value.trim()) {
+      if (value && String(value).trim()) {
         if (!/^[0-9]+(.[0-9]+)?$/.test(value)) {
           callback(new Error("仅限输入数字"));
         } else {

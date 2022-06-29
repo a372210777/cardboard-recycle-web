@@ -14,14 +14,19 @@
           @keyup.enter.native="crud.toQuery"
         />
         <label class="el-form-item-label">仓库</label>
-        <el-input
+        <el-select
           v-model="query.warehouseId"
           clearable
-          placeholder="仓库"
-          style="width: 185px;"
-          class="filter-item"
-          @keyup.enter.native="crud.toQuery"
-        />
+          filterable
+          placeholder="请选择"
+        >
+          <el-option
+            v-for="item in warehouseList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
         <rrOperation :crud="crud" />
       </div>
       <!--如果想在工具栏加入更多按钮，可以使用插槽方式， slot = 'left' or 'right'-->
@@ -156,7 +161,7 @@ import udOperation from "@crud/UD.operation";
 import pagination from "@crud/Pagination";
 import detailDialog from "./detailDialog";
 import addDialog from "./addDialog";
-
+import { queryWarehouse } from "@/api/common";
 const defaultForm = {
   id: null,
   buyerId: null,
@@ -184,7 +189,7 @@ export default {
     let optShow = {
       add: false,
       edit: false,
-      del: false,
+      del: true,
       download: false,
       reset: true
     };
@@ -199,6 +204,7 @@ export default {
   },
   data() {
     return {
+      warehouseList: [],
       permission: {
         add: ["admin", "stockOutOrder:add"],
         edit: ["admin", "stockOutOrder:edit"],
@@ -223,6 +229,18 @@ export default {
         { key: "warehouseId", display_name: "仓库" }
       ]
     };
+  },
+  mounted() {
+    let params = {
+      page: 0,
+      size: 100
+    };
+    queryWarehouse(params).then(res => {
+      this.warehouseList = res.content;
+      if (this.warehouseList.length) {
+        this.formInline.warehouse = this.warehouseList[0].id;
+      }
+    });
   },
   methods: {
     // 钩子：在获取表格数据之前执行，false 则代表不获取数据
