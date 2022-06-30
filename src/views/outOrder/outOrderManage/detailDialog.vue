@@ -25,7 +25,7 @@
           </el-table-column>
           <el-table-column prop="quantity" label="数量" />
           <el-table-column prop="unitPrice" label="单价" />
-          <el-table-column prop="unitPrice" label="折后单价" />
+          <el-table-column prop="discountPrice" label="折后单价" />
           <el-table-column prop="unit" label="单位" />
           <el-table-column prop="remark" label="备注" />
         </el-table>
@@ -42,11 +42,11 @@
             <el-table-column prop="tareWeight" label="皮重" />
             <el-table-column prop="netWeight" label="净重" />
             <el-table-column prop="deductWeight" label="扣重" />
+            <el-table-column prop="actualWeight" label="折合重量" />
             <el-table-column prop="waterPercent" label="水分比例" />
             <el-table-column prop="impurityPercent" label="杂物比例" />
             <el-table-column prop="incidentalPaperPercent" label="杂纸比例" />
             <el-table-column prop="totalDeductPercent" label="综合折率" />
-            <el-table-column prop="actualWeight" label="折合重量" />
             <el-table-column prop="weighingAttachment" label="称重单附件">
               <template slot-scope="scope">
                 <el-popover
@@ -176,9 +176,24 @@ export default {
       this.orderItems = data.orderItems;
       this.orderItems.forEach(element => {
         element.materialName = element.material.name;
+
+        //物料的重量
+        let totalWeight = 0;
+        //物料的折后重量（扣除水分，杂质后的重量）
+        let actualWeight = 0;
+        if (element.qualityCheckCerts && element.qualityCheckCerts.length) {
+          element.qualityCheckCerts.forEach(item => {
+            item.materialName = element.materialName;
+            totalWeight += item.netWeight;
+            actualWeight += item.actualWeight;
+          });
+        }
+        element.discountPrice =
+          (actualWeight / totalWeight) * element.unitPrice;
+        element.discountPrice = element.discountPrice.toFixed(3);
+
         this.checkData = this.checkData.concat(element.qualityCheckCerts || []);
       });
-      console.log("质检单数据===", this.checkData);
       this.wayBill =
         data.waybills && data.waybills.length ? data.waybills[0] : {};
       this.checkOrderType(data);

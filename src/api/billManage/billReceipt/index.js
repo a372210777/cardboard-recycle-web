@@ -8,9 +8,10 @@ export function add(data) {
   })
 }
 
+//删除对账单某一种物料
 export function del(ids) {
   return request({
-    url: 'api/statement/',
+    url: 'api/statement/item',
     method: 'delete',
     data: ids
   })
@@ -43,7 +44,20 @@ export function staticsByMonth(params) {
   })
 }
 
+//修改对账单单行项
+export function modifyStatementItem(data) {
+  return request({
+    url: '/api/statement/item',
+    method: 'put',
+    data
+  })
+}
 
 
 
-export default { add, edit, del,staticsByMonth,queryData }
+
+
+
+
+
+export default { add, edit, del,staticsByMonth,queryData,modifyStatementItem }

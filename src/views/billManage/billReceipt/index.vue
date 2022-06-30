@@ -54,21 +54,20 @@
       <!--表单组件-->
       <el-dialog
         :close-on-click-modal="false"
-        :before-close="crud.cancelCU"
-        :visible.sync="crud.status.cu > 0"
-        :title="crud.status.title"
+        :visible.sync="editDialogVisible"
+        :title="'编辑'"
         width="500px"
       >
         <el-form
-          ref="form"
-          :model="form"
+          ref="updateForm"
+          :model="updateForm"
           :rules="rules"
           size="small"
           label-width="80px"
         >
           <el-form-item label="物料名称" prop="material.name">
             <el-input
-              v-model="form.material.name"
+              v-model="updateForm.material.name"
               filterable
               clearable
               disabled
@@ -78,7 +77,7 @@
           </el-form-item>
           <el-form-item label="数量" prop="quantity">
             <el-input
-              v-model="form.quantity"
+              v-model="updateForm.quantity"
               filterable
               clearable
               disabled
@@ -88,7 +87,7 @@
           </el-form-item>
           <el-form-item label="单价" prop="purchasePrice">
             <el-input
-              v-model="form.purchasePrice"
+              v-model="updateForm.purchasePrice"
               filterable
               clearable
               placeholder="请选择"
@@ -97,7 +96,7 @@
           </el-form-item>
           <el-form-item label="对账结果" prop="statementResult">
             <el-select
-              v-model="form.statementResult"
+              v-model="updateForm.statementResult"
               filterable
               placeholder="请选择"
             >
@@ -111,7 +110,7 @@
           </el-form-item>
           <el-form-item label="备注" prop="remark">
             <el-input
-              v-model="form.remark"
+              v-model="updateForm.remark"
               filterable
               clearable
               placeholder="请选择"
@@ -122,11 +121,13 @@
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button type="text" @click="crud.cancelCU">取消</el-button>
+          <el-button type="text" @click="editDialogVisible = false"
+            >取消</el-button
+          >
           <el-button
-            :loading="crud.status.cu === 2"
+            :loading="updateLoading"
             type="primary"
-            @click="crud.submitCU"
+            @click="submitUpdate"
             >确认</el-button
           >
         </div>
@@ -191,16 +192,28 @@
           label="操作"
           width="150px"
           align="center"
+          fixed="right"
         >
           <template slot-scope="scope">
-            <udOperation :data="scope.row" :permission="permission" />
+            <udOperation
+              :showEdit="false"
+              :data="scope.row"
+              :permission="permission"
+            >
+              <el-button
+                size="mini"
+                type="primary"
+                icon="el-icon-edit"
+                @click="openEditDialog(scope.row)"
+              />
+            </udOperation>
           </template>
         </el-table-column>
       </el-table>
       <!--分页组件-->
       <pagination />
     </div>
-    <addDialog ref="addDialog"></addDialog>
+    <addDialog ref="addDialog" @saveSuccess="crud.refresh()"></addDialog>
   </div>
 </template>
 
@@ -212,6 +225,7 @@ import crudOperation from "@crud/CRUD.operation";
 import udOperation from "@crud/UD.operation";
 import pagination from "@crud/Pagination";
 import addDialog from "./addDialog";
+import { deepClone } from "@/utils/index";
 const defaultForm = {
   id: null,
   year: null,
@@ -253,21 +267,31 @@ export default {
   },
   data() {
     return {
+      editDialogVisible: false,
+      updateLoading: false,
       statementTime: "", //对账时间
       permission: {
         add: ["admin", "statement:add"],
         edit: ["admin", "statement:edit"],
         del: ["admin", "statement:del"]
       },
+      updateForm: {
+        id: "",
+        material: {},
+        statement: {}, //所属对账单
+        purchasePrice: "",
+        statementResult: "",
+        remark: ""
+      },
       rules: {
-        year: [
-          { required: true, message: "对账年份不能为空", trigger: "blur" }
+        purchasePrice: [
+          { required: true, message: "单价不能为空", trigger: "blur" }
         ],
-        month: [
-          { required: true, message: "对账月份不能为空", trigger: "blur" }
+        statementResult: [
+          { required: true, message: "对账结果不能为空", trigger: "blur" }
         ],
-        statementTime: [
-          { required: true, message: "对账时间不能为空", trigger: "blur" }
+        remark: [
+          { required: false, message: "对账时间不能为空", trigger: "blur" }
         ]
       },
       queryTypeOptions: [
@@ -294,6 +318,37 @@ export default {
         this.query.year = null;
         this.query.month = null;
       }
+    },
+    openEditDialog(row = {}) {
+      this.editDialogVisible = true;
+      console.log(row);
+      this.updateForm.id = row.id;
+      this.updateForm.material = row.material;
+      this.updateForm.quantity = row.quantity;
+      this.updateForm.purchasePrice = row.purchasePrice;
+      this.updateForm.statementResult = row.statementResult;
+      this.updateForm.remark = row.remark;
+      this.updateForm.statement = row.statement;
+    },
+    submitUpdate() {
+      this.$refs["updateForm"].validate(valid => {
+        if (valid) {
+          this.updateLoading = true;
+          let params = deepClone(this.updateForm);
+          crudStatement
+            .modifyStatementItem(params)
+            .then(res => {
+              this.updateLoading = false;
+              this.crud.refresh();
+              this.editDialogVisible = false;
+              return res;
+            })
+            .catch(() => {
+              this.updateLoading = false;
+              return null;
+            });
+        }
+      });
     }
   }
 };

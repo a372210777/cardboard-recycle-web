@@ -18,7 +18,7 @@
             :value="item.value"
           />
         </el-select>
-        <label class="el-form-item-label">开销金额大于等于</label>
+        <!-- <label class="el-form-item-label">开销金额大于等于</label>
         <el-input
           v-model="query.money"
           clearable
@@ -26,7 +26,7 @@
           style="width: 185px;"
           class="filter-item"
           @keyup.enter.native="crud.toQuery"
-        />
+        /> -->
         <label class="el-form-item-label">开销日期</label>
         <date-range-picker
           v-model="query.dates"

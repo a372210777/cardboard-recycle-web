@@ -516,15 +516,15 @@ export default {
       //质检单
       checkForm: {
         material: "", //物料id
-        grossWeight: "", //毛重
-        tareWeight: "", //皮重
-        netWeight: "", //净重
+        grossWeight: "", //毛重 （纸+车）
+        tareWeight: "", //皮重（车重）
+        netWeight: "", //净重（纸重）
         deductWeight: "0", //扣重
         impurityPercent: "0", //杂物比列
         totalDeductPercent: "0", //综合折率
         waterPercent: "0", //水分比列
         incidentalPaperPercent: "0", //杂纸比例
-        actualWeight: "0", //折合重量
+        actualWeight: "0", //折合重量（扣除杂质后的可算钱的纸重）
         weighingAttachment: {}, //称重单附件
         attachment: {}, //质检单附件
         remark: "" //备注

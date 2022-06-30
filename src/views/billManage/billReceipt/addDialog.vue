@@ -232,6 +232,8 @@ export default {
           .then(res => {
             console.log(res);
             this.loading = false;
+            this.dialogVisible = false;
+            this.$emit("saveSuccess");
           })
           .catch(() => {
             this.loading = false;
