@@ -464,7 +464,8 @@ import {
   generateRandom,
   deepClone,
   isEmptyObj,
-  dateFormat
+  dateFormat,
+  fixedDigit
 } from "@/utils/index";
 import fileIcon from "@/components/uploadFile/fileIcon";
 import { mapGetters } from "vuex";
@@ -622,6 +623,83 @@ export default {
         }
       },
       immediate: true
+    },
+    "checkForm.grossWeight": {
+      handler(val) {
+        if (val && /^[0-9]+(.[0-9]+)?$/.test(val)) {
+          if (
+            this.checkForm.tareWeight &&
+            /^[0-9]+(.[0-9]+)?$/.test(this.checkForm.tareWeight)
+          ) {
+            this.checkForm.netWeight = fixedDigit(
+              this.checkForm.grossWeight - this.checkForm.tareWeight
+            );
+          }
+        }
+      }
+    },
+    "checkForm.tareWeight": {
+      handler(val) {
+        if (val && /^[0-9]+(.[0-9]+)?$/.test(val)) {
+          if (
+            this.checkForm.tareWeight &&
+            /^[0-9]+(.[0-9]+)?$/.test(this.checkForm.tareWeight)
+          ) {
+            this.checkForm.netWeight = fixedDigit(
+              this.checkForm.grossWeight - this.checkForm.tareWeight
+            );
+          }
+        }
+      }
+    },
+    "checkForm.totalDeductPercent": {
+      handler(val) {
+        if (val && /^[0-9]+(.[0-9]+)?$/.test(val)) {
+          if (
+            this.checkForm.netWeight &&
+            /^[0-9]+(.[0-9]+)?$/.test(this.checkForm.netWeight)
+          ) {
+            this.checkForm.deductWeight = fixedDigit(
+              (this.checkForm.netWeight * val) / 100
+            );
+          }
+        }
+      }
+    },
+    "checkForm.netWeight": {
+      handler(val) {
+        if (val && /^[0-9]+(.[0-9]+)?$/.test(val)) {
+          if (
+            this.checkForm.totalDeductPercent &&
+            /^[0-9]+(.[0-9]+)?$/.test(this.checkForm.totalDeductPercent)
+          ) {
+            this.checkForm.deductWeight = fixedDigit(
+              (this.checkForm.netWeight * this.checkForm.totalDeductPercent) /
+                100
+            );
+          }
+          if (
+            this.checkForm.deductWeight &&
+            /^[0-9]+(.[0-9]+)?$/.test(this.checkForm.deductWeight)
+          ) {
+            this.checkForm.actualWeight = fixedDigit(
+              val - this.checkForm.deductWeight
+            );
+          }
+        }
+      }
+    },
+    "checkForm.deductWeight": {
+      handler(val) {
+        if (val && /^[0-9]+(.[0-9]+)?$/.test(val)) {
+          if (
+            this.checkForm.netWeight &&
+            /^[0-9]+(.[0-9]+)?$/.test(this.checkForm.netWeight)
+          ) {
+            this.checkForm.actualWeight = this.checkForm.netWeight - val;
+          }
+        }
+      }
     }
   },
   computed: {
@@ -689,11 +767,7 @@ export default {
             }
           });
           if (!isMaterialInAddList) {
-            this.$notify({
-              title: "质检单得物料必须包含再入库物料中",
-              type: "error",
-              duration: 2500
-            });
+            this.$message.warning("质检单得物料必须包含再入库物料中");
             return;
           }
           this.checkForm.materialName = materialItem.name;

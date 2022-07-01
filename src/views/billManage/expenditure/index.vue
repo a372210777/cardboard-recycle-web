@@ -89,6 +89,7 @@
               type="date"
               placeholder="选择日期时间"
               style="width: 215px;"
+              unlink-panels
               value-format="yyyy-MM-dd"
             >
             </el-date-picker>

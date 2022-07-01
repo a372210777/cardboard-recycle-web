@@ -444,3 +444,11 @@ export function generateRandom(){
 export function isEmptyObj(obj={}){
   return Object.keys(obj).length == 0;
 }
+//数字保存指定位数
+export function fixedDigit(num,val=3){
+  if(isNaN(num)){
+    return num
+  }else{
+    return num.toFixed(val)
+  }
+}

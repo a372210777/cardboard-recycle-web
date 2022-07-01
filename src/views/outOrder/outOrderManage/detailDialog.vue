@@ -176,7 +176,7 @@ export default {
       this.orderItems = data.orderItems;
       this.orderItems.forEach(element => {
         element.materialName = element.material.name;
-
+        element.discountPrice = element.unitPrice;
         //物料的重量
         let totalWeight = 0;
         //物料的折后重量（扣除水分，杂质后的重量）
@@ -187,10 +187,10 @@ export default {
             totalWeight += item.netWeight;
             actualWeight += item.actualWeight;
           });
+          element.discountPrice =
+            (actualWeight / totalWeight) * element.unitPrice;
+          element.discountPrice = element.discountPrice.toFixed(3);
         }
-        element.discountPrice =
-          (actualWeight / totalWeight) * element.unitPrice;
-        element.discountPrice = element.discountPrice.toFixed(3);
 
         this.checkData = this.checkData.concat(element.qualityCheckCerts || []);
       });
@@ -210,7 +210,6 @@ export default {
       } else {
         this.mode = "other";
       }
-      console.log("mode===", this.mode);
     },
     hideDialog() {
       this.dialogVisible = false;
