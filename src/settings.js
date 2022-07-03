@@ -38,15 +38,76 @@ module.exports = {
   /**
    * 底部文字，支持html语法
    */
-  footerTxt: '© 2019 Zheng Jie <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank">Apache License 2.0</a>',
+  footerTxt: '© 2022 卓岑再生资源处理系统',
   /**
    * 备案号
    */
-  caseNumber: '浙ICP备18005431号',
+  caseNumber: '',
 
   websiteName:"卓岑再生资源处理系统",
   /**
    * 最大表格高度
    */
-  maxTableHeight:"450"
+  maxTableHeight:"450",
+  /**
+   * 日期默认快捷项
+  */
+  defaultPickerOptions: {
+    shortcuts: [
+      {
+        text: "最近一周",
+        onClick(picker) {
+          const end = new Date();
+          const start = new Date();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+          picker.$emit("pick", [start, end]);
+        }
+      },
+      {
+        text: "最近半个月",
+        onClick(picker) {
+          const end = new Date();
+          const start = new Date();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 15);
+          picker.$emit("pick", [start, end]);
+        }
+      },
+      {
+        text: "最近一个月",
+        onClick(picker) {
+          const end = new Date();
+          const start = new Date();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+          picker.$emit("pick", [start, end]);
+        }
+      },
+      {
+        text: "最近三个月",
+        onClick(picker) {
+          const end = new Date();
+          const start = new Date();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+          picker.$emit("pick", [start, end]);
+        }
+      },
+      {
+        text: "最近半年",
+        onClick(picker) {
+          const end = new Date();
+          const start = new Date();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 180);
+          picker.$emit("pick", [start, end]);
+        }
+      },
+      {
+        text: "最近一年",
+        onClick(picker) {
+          const end = new Date();
+          const start = new Date();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 365);
+          picker.$emit("pick", [start, end]);
+        }
+      }
+    ]
+  }
 }

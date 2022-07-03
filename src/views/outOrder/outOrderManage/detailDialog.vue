@@ -24,8 +24,17 @@
             </template>
           </el-table-column>
           <el-table-column prop="quantity" label="数量" />
-          <el-table-column prop="unitPrice" label="单价" />
-          <el-table-column prop="discountPrice" label="折后单价" />
+          <el-table-column prop="unitPrice" label="单价（元）" />
+          <el-table-column
+            v-if="isPaperOrder"
+            prop="discountPrice"
+            label="折后单价（元）"
+          />
+          <el-table-column label="总市值（元）">
+            <template slot-scope="scope">
+              {{ (scope.row.discountPrice * scope.row.quantity).toFixed(3) }}
+            </template>
+          </el-table-column>
           <el-table-column prop="unit" label="单位" />
           <el-table-column prop="remark" label="备注" />
         </el-table>
@@ -172,6 +181,7 @@ export default {
     showDialog(data = {}) {
       this.dialogVisible = true;
       this.resetData();
+      this.checkOrderType(data);
       this.rowData = data;
       this.orderItems = data.orderItems;
       this.orderItems.forEach(element => {
@@ -196,7 +206,6 @@ export default {
       });
       this.wayBill =
         data.waybills && data.waybills.length ? data.waybills[0] : {};
-      this.checkOrderType(data);
     },
     //检查出库单类型
     checkOrderType(data = {}) {

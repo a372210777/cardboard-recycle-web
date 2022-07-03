@@ -56,6 +56,7 @@
           value-format="yyyy-MM-dd"
           unlink-panels
           @change="dateChange"
+          :picker-options="pickerOptions"
         >
         </el-date-picker>
         <label class="el-form-item-label">出入库</label>
@@ -80,7 +81,7 @@
           placeholder="请选择"
         >
           <el-option
-            v-for="item in reportTypeList"
+            v-for="item in dict.report_type"
             :key="item.id"
             :label="item.label"
             :value="item.value"
@@ -127,6 +128,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="quantity" label="数量" />
+        <el-table-column prop="money" label="总金额（元）" />
         <el-table-column prop="date" label="日期" />
       </el-table>
     </div>
@@ -157,23 +159,14 @@ export default {
     udOperation,
     DateRangePicker
   },
-  dicts: ["material_category"],
+  dicts: ["material_category", "report_type"],
   data() {
     return {
       loading: false,
       tableData: [],
       warehouseList: [],
       materialList: [],
-      reportTypeList: [
-        {
-          label: "按天统计",
-          value: "daily"
-        },
-        {
-          label: "按时间段统计",
-          value: "summary"
-        }
-      ],
+      pickerOptions: this.$store.state.settings.defaultPickerOptions,
       orderTypeList: [
         {
           label: "入库单",
@@ -190,11 +183,20 @@ export default {
         materialId: "",
         warehouseId: "",
         orderType: "stockIn", //入库单，出库单
-        reportType: "summary", //统计方式
+        reportType: "", //统计方式
         beginDate: beginDateStr,
         endDate: endDateStr
       }
     };
+  },
+  watch: {
+    "dict.report_type": {
+      handler(val) {
+        if (val && val.length) {
+          this.form.reportType = val[0].value;
+        }
+      }
+    }
   },
   mounted() {
     let params = {

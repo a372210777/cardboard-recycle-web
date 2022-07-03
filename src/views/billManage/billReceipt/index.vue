@@ -266,6 +266,17 @@ export default {
     });
   },
   data() {
+    let checkNumber = (rule, value, callback) => {
+      if (value && String(value).trim()) {
+        if (!/^[0-9]+(.[0-9]+)?$/.test(value)) {
+          callback(new Error("仅限输入数字"));
+        } else {
+          callback();
+        }
+      } else {
+        callback();
+      }
+    };
     return {
       editDialogVisible: false,
       updateLoading: false,
@@ -285,7 +296,8 @@ export default {
       },
       rules: {
         purchasePrice: [
-          { required: true, message: "单价不能为空", trigger: "blur" }
+          { required: true, message: "单价不能为空", trigger: "blur" },
+          { required: true, validator: checkNumber, trigger: "blur" }
         ],
         statementResult: [
           { required: true, message: "对账结果不能为空", trigger: "blur" }

@@ -21,4 +21,14 @@ export function stockOut(params) {
     })
   }
   
-export default { stockIn,stockOut }
+  
+//出库金额统计
+export function stockOutMoney(params) {
+  return request({
+    url: '/api/report/chart/stockOutMoney',
+    method: 'get',
+    params
+  })
+}
+  
+export default { stockIn,stockOut,stockOutMoney }

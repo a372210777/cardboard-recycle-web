@@ -488,6 +488,20 @@ export default {
         callback();
       }
     };
+    let checkQuantity = (rule, value, callback) => {
+      if (Number(value) <= 0) {
+        callback(new Error("数量不能小于等于0"));
+      } else {
+        callback();
+      }
+    };
+    let checkOutTime = (rule, value, callback) => {
+      if (new Date(value).getTime() > new Date().getTime()) {
+        callback(new Error("出库时间不能大于今天"));
+      } else {
+        callback();
+      }
+    };
     return {
       mode: "", //paper(纸类出库单),other(非纸类出库单)
       addDialogVisible: false,
@@ -591,8 +605,10 @@ export default {
       },
       rules: {
         stockOutTime: [
-          { required: true, message: "出库时间不能为空", trigger: "blur" }
+          { required: true, message: "出库时间不能为空", trigger: "change" },
+          { required: true, validator: checkOutTime, trigger: "change" }
         ],
+
         buyer: [{ required: true, message: "采购商不能为空", trigger: "blur" }],
         warehouse: [
           { required: true, message: "仓库不能为空", trigger: "blur" }
@@ -605,7 +621,8 @@ export default {
         ],
         quantity: [
           { required: true, message: "数量不能为空", trigger: "blur" },
-          { required: true, validator: checkNumber, trigger: "blur" }
+          { required: true, validator: checkNumber, trigger: "blur" },
+          { required: true, validator: checkQuantity, trigger: "blur" }
         ],
         unitPrice: [
           { required: true, message: "单价不能为空", trigger: "blur" },
@@ -842,6 +859,7 @@ export default {
           let carrierItem = this.carrierList.find(
             item => item.id == this.formInline.carrier
           );
+
           //禁止重复添加相同得物料
           let isAddSameMaterial = false;
           this.addData.forEach(item => {
@@ -851,6 +869,14 @@ export default {
           });
           if (isAddSameMaterial) {
             this.$message.warning("已添加过该物料，如需添加请先删除");
+            return;
+          }
+          let stockOutTimeArr = this.addData.map(item => {
+            return item.stockOutTime;
+          });
+          stockOutTimeArr.push(this.formInline.stockOutTime);
+          if (new Set(stockOutTimeArr).size > 1) {
+            this.$message.warning("物料的出库时间必须一致");
             return;
           }
           this.formInline.materialName = materialItem.name;
@@ -917,6 +943,7 @@ export default {
             this.addDialogVisible = false;
             this.addData = [];
             this.checkData = [];
+            this.reset("addForm");
             this.$parent.crud.refresh();
           })
           .catch(() => {
@@ -983,6 +1010,8 @@ export default {
             this.loading = false;
             this.addData = [];
             this.checkData = [];
+            this.reset("addForm");
+            this.reset("checkForm");
             this.$parent.crud.refresh();
             this.addDialogVisible = false;
           })

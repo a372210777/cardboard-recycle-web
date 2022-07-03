@@ -198,6 +198,25 @@ export default {
         this.$message.warning("当前月份无入库数据");
         return;
       }
+      let hasInvalidPrice = false;
+      let tipMsg = "";
+      for (let i = 0; i < this.tableData.length; i++) {
+        let ele = this.tableData[i];
+        if (!ele.purchasePrice || String(ele.purchasePrice).trim() == "") {
+          hasInvalidPrice = true;
+          tipMsg = `第${i + 1}单价不能为空`;
+          break;
+        } else if (!/^[0-9]+(.[0-9]+)?$/.test(ele.purchasePrice)) {
+          hasInvalidPrice = true;
+          tipMsg = `第${i + 1}单价必须是合法数字`;
+          break;
+        }
+      }
+
+      if (hasInvalidPrice) {
+        this.$message.warning(tipMsg);
+        return;
+      }
       let res = await this.queryData();
       let isOk = true;
       if (res && res.content && res.content.length) {

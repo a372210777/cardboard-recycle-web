@@ -27,8 +27,23 @@
           end-placeholder="结束日期"
           value-format="yyyy-MM-dd"
           @change="dateChange"
+          :picker-options="pickerOptions"
         >
         </el-date-picker>
+        <label class="el-form-item-label">统计方式</label>
+        <el-select
+          v-model="form.reportType"
+          clearable
+          filterable
+          placeholder="请选择"
+        >
+          <el-option
+            v-for="item in dict.report_type"
+            :key="item.id"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
         <span>
           <el-button
             class="filter-item"
@@ -92,18 +107,29 @@ export default {
     udOperation,
     DateRangePicker
   },
-  dicts: ["expense_category"],
+  dicts: ["expense_category", "report_type"],
   data() {
     return {
       loading: false,
       tableData: [],
       date: [beginDateStr, endDateStr],
+      pickerOptions: this.$store.state.settings.defaultPickerOptions,
       form: {
         category: "",
         beginDate: beginDateStr,
-        endDate: endDateStr
+        endDate: endDateStr,
+        reportType: ""
       }
     };
+  },
+  watch: {
+    "dict.report_type": {
+      handler(val) {
+        if (val && val.length) {
+          this.form.reportType = val[0].value;
+        }
+      }
+    }
   },
   methods: {
     dateChange(val) {

@@ -49,6 +49,28 @@
         </el-row>
         <line-chart :chart-data="outLineChartData" />
       </el-row>
+      <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
+        <el-row type="flex" justify="center" style="position:relative">
+          <el-date-picker
+            v-model="inComeDates"
+            type="daterange"
+            align="right"
+            unlink-panels
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            value-format="yyyy-MM-dd"
+            :picker-options="pickerOptions"
+            @change="inComeDateChange"
+            style="position:absolute;left:0"
+          >
+          </el-date-picker>
+          <span style="font-weight:bold;display:inline-block;height:25px"
+            >收入</span
+          >
+        </el-row>
+        <line-chart :chart-data="inComeLineChartData" />
+      </el-row>
       <el-row :gutter="32">
         <el-col :xs="24" :sm="24" :lg="8">
           <div class="chart-wrapper">
@@ -77,7 +99,7 @@ import LineChart from "./dashboard/LineChart";
 import RadarChart from "@/components/Echarts/RadarChart";
 import PieChart from "@/components/Echarts/PieChart";
 import BarChart from "@/components/Echarts/BarChart";
-import { stockIn, stockOut } from "@/api/dashboard/index";
+import { stockIn, stockOut, stockOutMoney } from "@/api/dashboard/index";
 import { dateFormat } from "@/utils/index";
 
 import DateRangePicker from "@/components/DateRangePicker";
@@ -100,9 +122,9 @@ const lineChartData = {
   }
 };
 
-//默认最近一周
+//默认最近一个月
 const end = new Date();
-const start = end.getTime() - 3600 * 1000 * 24 * 7;
+const start = end.getTime() - 3600 * 1000 * 24 * 30;
 let defaultDate = [
   dateFormat(start, "yyyy-MM-dd"),
   dateFormat(end, "yyyy-MM-dd")
@@ -123,68 +145,19 @@ export default {
     return {
       dates: defaultDate,
       outDates: defaultDate,
+      inComeDates: defaultDate,
       // lineChartData: lineChartData.newVisitis,
-      lineChartData: {},
+      lineChartData: {}, //入库图表数据
       outLineChartData: {}, //出库图表
-      pickerOptions: {
-        shortcuts: [
-          {
-            text: "最近一周",
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-              picker.$emit("pick", [start, end]);
-            }
-          },
-          {
-            text: "最近半个月",
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 15);
-              picker.$emit("pick", [start, end]);
-            }
-          },
-          {
-            text: "最近一个月",
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-              picker.$emit("pick", [start, end]);
-            }
-          },
-          {
-            text: "最近三个月",
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-              picker.$emit("pick", [start, end]);
-            }
-          },
-          {
-            text: "最近半年",
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 180);
-              picker.$emit("pick", [start, end]);
-            }
-          }
-        ]
-      }
+      inComeLineChartData: {}, //收入图表
+      pickerOptions: this.$store.state.settings.defaultPickerOptions
     };
   },
-  watch: {
-    dates: {
-      handler(val) {
-        console.log(val);
-      }
-    }
+  mounted() {
+    this.inDateChange(defaultDate);
+    this.outDateChange(defaultDate);
+    this.inComeDateChange(defaultDate);
   },
-  mounted() {},
   methods: {
     handleSetLineChartData(type) {
       this.lineChartData = lineChartData[type];
@@ -216,6 +189,29 @@ export default {
       }
       this.reqeustStockOut(params);
     },
+    inComeDateChange(val) {
+      let params = {
+        beginDate: defaultDate[0],
+        endDate: defaultDate[1]
+      };
+      if (val && val.length) {
+        params = {
+          beginDate: val[0],
+          endDate: val[1]
+        };
+      }
+      this.reqeustStockOutMoney(params);
+    },
+    //出库金额数据
+    reqeustStockOutMoney(params) {
+      stockOutMoney(params)
+        .then(res => {
+          console.log("出库金额数据===", res);
+          this.inComeLineChartData = res;
+        })
+        .catch(() => {});
+    },
+    //入库数据
     reqeustStockIn(params) {
       stockIn(params)
         .then(res => {
@@ -224,6 +220,7 @@ export default {
         })
         .catch(() => {});
     },
+    //出库数据
     reqeustStockOut(params) {
       stockOut(params)
         .then(res => {

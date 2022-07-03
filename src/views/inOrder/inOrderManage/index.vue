@@ -284,6 +284,21 @@ export default {
         callback();
       }
     };
+    let checkQuantity = (rule, value, callback) => {
+      if (Number(value) <= 0) {
+        callback(new Error("数量不能小于等于0"));
+      } else {
+        callback();
+      }
+    };
+    let checkInTime = (rule, value, callback) => {
+      if (new Date(value).getTime() > new Date().getTime()) {
+        callback(new Error("入库时间不能大于今天"));
+      } else {
+        callback();
+      }
+    };
+
     return {
       addDialogVisible: false,
       detailDialog: false,
@@ -311,8 +326,10 @@ export default {
       },
       rules: {
         stockInTime: [
-          { required: true, message: "入库时间不能为空", trigger: "blur" }
+          { required: true, message: "入库时间不能为空", trigger: "change" },
+          { required: true, validator: checkInTime, trigger: "change" }
         ],
+
         supplier: [
           { required: true, message: "供应商不能为空", trigger: "blur" }
         ],
@@ -324,7 +341,8 @@ export default {
         ],
         quantity: [
           { required: true, message: "数量不能为空", trigger: "blur" },
-          { required: true, validator: checkNumber, trigger: "blur" }
+          { required: true, validator: checkNumber, trigger: "blur" },
+          { required: true, validator: checkQuantity, trigger: "blur" }
         ],
         unit: [{ required: true, message: "单位不能为空", trigger: "blur" }]
       },
@@ -431,6 +449,7 @@ export default {
           let supplierItem = this.supplierList.find(
             item => item.id == this.formInline.supplier
           );
+
           //禁止重复添加相同得物料
           let isAddSameMaterial = false;
           this.addData.forEach(item => {
@@ -442,6 +461,15 @@ export default {
             this.$message.warning("已添加过该物料，如需添加请先删除");
             return;
           }
+          let stockInTimeArr = this.addData.map(item => {
+            return item.stockInTime;
+          });
+          stockInTimeArr.push(this.formInline.stockInTime);
+          if (new Set(stockInTimeArr).size > 1) {
+            this.$message.warning("物料的入库时间必须一致");
+            return;
+          }
+
           this.formInline.materialName = materialItem.name;
           this.formInline.warehouseName = warehouseItem.name;
           this.formInline.supplierName = supplierItem.name;

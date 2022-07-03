@@ -43,7 +43,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            本月开销
+            本月收入
           </div>
           <count-to
             :start-val="0"
@@ -61,7 +61,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            Shoppings
+            本月开销
           </div>
           <count-to
             :start-val="0"
