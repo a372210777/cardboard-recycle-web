@@ -18,6 +18,7 @@
           <el-table-column prop="id" label="物料编码" />
           <el-table-column prop="materialName" label="物料" />
           <el-table-column prop="quantity" label="数量" />
+          <el-table-column prop="unitPrice" label="单价（元）" />
           <el-table-column prop="unit" label="单位" />
           <el-table-column prop="remark" label="备注" />
         </el-table>

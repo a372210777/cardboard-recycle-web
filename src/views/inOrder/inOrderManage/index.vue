@@ -13,6 +13,18 @@
           class="filter-item"
           @keyup.enter.native="crud.toQuery"
         />
+        <label class="el-form-item-label">入库时间</label>
+        <el-date-picker
+          v-model="query.stockInTime"
+          type="daterange"
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          value-format="yyyy-MM-dd HH:mm:ss"
+          unlink-panels
+          :picker-options="pickerOptions"
+        >
+        </el-date-picker>
         <rrOperation :crud="crud" />
       </div>
       <!--如果想在工具栏加入更多按钮，可以使用插槽方式， slot = 'left' or 'right'-->
@@ -307,6 +319,7 @@ export default {
       warehouseList: [], //仓库列表
       materialList: [], //物料数据
       loading: false,
+      pickerOptions: this.$store.state.settings.defaultPickerOptions,
       permission: {
         add: ["admin", "stockInOrder:add"],
         edit: ["admin", "stockInOrder:edit"],

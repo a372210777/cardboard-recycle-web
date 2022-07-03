@@ -84,7 +84,7 @@
         <!--分页组件-->
         <pagination />
         <span slot="footer" class="dialog-footer">
-          <el-button @click="dialogVisible = false">取 消</el-button>
+          <el-button :loading="loading" @click="cancel">取 消</el-button>
           <el-button type="primary" :loading="loading" @click="save"
             >保存</el-button
           >
@@ -193,6 +193,11 @@ export default {
           return null;
         });
     },
+    cancel() {
+      this.dialogVisible = false;
+      this.tableData = [];
+      this.yearMonth = "";
+    },
     async save() {
       if (!this.tableData.length) {
         this.$message.warning("当前月份无入库数据");
@@ -204,11 +209,11 @@ export default {
         let ele = this.tableData[i];
         if (!ele.purchasePrice || String(ele.purchasePrice).trim() == "") {
           hasInvalidPrice = true;
-          tipMsg = `第${i + 1}单价不能为空`;
+          tipMsg = `第${i + 1}行单价不能为空`;
           break;
         } else if (!/^[0-9]+(.[0-9]+)?$/.test(ele.purchasePrice)) {
           hasInvalidPrice = true;
-          tipMsg = `第${i + 1}单价必须是合法数字`;
+          tipMsg = `第${i + 1}行单价必须是合法数字`;
           break;
         }
       }
@@ -252,6 +257,8 @@ export default {
             console.log(res);
             this.loading = false;
             this.dialogVisible = false;
+            this.tableData = [];
+            this.yearMonth = "";
             this.$emit("saveSuccess");
           })
           .catch(() => {

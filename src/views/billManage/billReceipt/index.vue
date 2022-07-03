@@ -172,9 +172,14 @@
             {{ scope.row.quantity }}
           </template>
         </el-table-column>
-        <el-table-column prop="" label="单价">
+        <el-table-column prop="" label="单价（元）">
           <template slot-scope="scope">
             {{ scope.row.purchasePrice }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="" label="总金额（元）">
+          <template slot-scope="scope">
+            {{ (scope.row.purchasePrice * scope.row.quantity).toFixed(3) }}
           </template>
         </el-table-column>
         <el-table-column prop="" label="对账结果">

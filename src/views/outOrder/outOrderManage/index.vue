@@ -13,6 +13,18 @@
           class="filter-item"
           @keyup.enter.native="crud.toQuery"
         />
+        <label class="el-form-item-label">出库时间</label>
+        <el-date-picker
+          v-model="query.stockOutTime"
+          type="daterange"
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          value-format="yyyy-MM-dd HH:mm:ss"
+          unlink-panels
+          :picker-options="pickerOptions"
+        >
+        </el-date-picker>
         <label class="el-form-item-label">仓库</label>
         <el-select
           v-model="query.warehouseId"
@@ -205,6 +217,7 @@ export default {
   data() {
     return {
       warehouseList: [],
+      pickerOptions: this.$store.state.settings.defaultPickerOptions,
       permission: {
         add: ["admin", "stockOutOrder:add"],
         edit: ["admin", "stockOutOrder:edit"],

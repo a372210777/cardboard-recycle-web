@@ -159,7 +159,12 @@
           <el-table-column prop="stockOutTime" label="出库时间" />
           <el-table-column prop="buyerName" label="采购商" />
           <el-table-column prop="remark" label="备注" />
-          <el-table-column label="操作" width="100px" align="center">
+          <el-table-column
+            label="操作"
+            width="100px"
+            fixed="right"
+            align="center"
+          >
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -380,7 +385,12 @@
               </template>
             </el-table-column>
             <el-table-column prop="remark" label="备注" />
-            <el-table-column label="操作" width="100px" align="center">
+            <el-table-column
+              label="操作"
+              width="100px"
+              fixed="right"
+              align="center"
+            >
               <template slot-scope="scope">
                 <el-button
                   size="mini"
