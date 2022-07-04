@@ -23,14 +23,14 @@
               {{ scope.row.id }}
             </template>
           </el-table-column>
-          <el-table-column prop="quantity" label="数量" />
+          <el-table-column prop="quantity" label="数量（kg）" />
           <el-table-column prop="unitPrice" label="单价（元）" />
           <el-table-column
             v-if="isPaperOrder"
             prop="discountPrice"
             label="折后单价（元）"
           />
-          <el-table-column label="总市值（元）">
+          <el-table-column label="总金额（元）">
             <template slot-scope="scope">
               {{ (scope.row.discountPrice * scope.row.quantity).toFixed(3) }}
             </template>

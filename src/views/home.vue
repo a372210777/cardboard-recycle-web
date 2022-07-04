@@ -74,14 +74,48 @@
       <el-row :gutter="32">
         <el-col :xs="24" :sm="24" :lg="8">
           <div class="chart-wrapper">
-            <radar-chart />
+            <el-date-picker
+              v-model="pieDates"
+              type="daterange"
+              align="right"
+              unlink-panels
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              value-format="yyyy-MM-dd"
+              :picker-options="pickerOptions"
+              @change="pieDateChange"
+              style="position: absolute;left: 50%; top: 8px;transform: translateX(-50%);"
+            >
+            </el-date-picker>
+            <pie-chart title="入库物料分布" :chart-data="pieChartData" />
           </div>
         </el-col>
         <el-col :xs="24" :sm="24" :lg="8">
           <div class="chart-wrapper">
-            <pie-chart />
+            <el-date-picker
+              v-model="outPieDates"
+              type="daterange"
+              align="right"
+              unlink-panels
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              value-format="yyyy-MM-dd"
+              :picker-options="pickerOptions"
+              @change="outPieDateChange"
+              style="position: absolute;left: 50%; top: 8px;transform: translateX(-50%);"
+            >
+            </el-date-picker>
+            <pie-chart title="出库物料分布" :chart-data="pieChartDataOut" />
           </div>
         </el-col>
+        <el-col :xs="24" :sm="24" :lg="8">
+          <div class="chart-wrapper">
+            <radar-chart />
+          </div>
+        </el-col>
+
         <el-col :xs="24" :sm="24" :lg="8">
           <div class="chart-wrapper">
             <bar-chart />
@@ -96,8 +130,8 @@
 import GithubCorner from "@/components/GithubCorner";
 import PanelGroup from "./dashboard/PanelGroup";
 import LineChart from "./dashboard/LineChart";
+import PieChart from "./dashboard/PieChart";
 import RadarChart from "@/components/Echarts/RadarChart";
-import PieChart from "@/components/Echarts/PieChart";
 import BarChart from "@/components/Echarts/BarChart";
 import { stockIn, stockOut, stockOutMoney } from "@/api/dashboard/index";
 import { dateFormat } from "@/utils/index";
@@ -146,10 +180,14 @@ export default {
       dates: defaultDate,
       outDates: defaultDate,
       inComeDates: defaultDate,
+      pieDates: defaultDate,
+      outPieDates: defaultDate,
       // lineChartData: lineChartData.newVisitis,
       lineChartData: {}, //入库图表数据
       outLineChartData: {}, //出库图表
       inComeLineChartData: {}, //收入图表
+      pieChartData: {}, //入库物料饼图数据
+      pieChartDataOut: {}, //出库物料饼图
       pickerOptions: this.$store.state.settings.defaultPickerOptions
     };
   },
@@ -157,6 +195,8 @@ export default {
     this.inDateChange(defaultDate);
     this.outDateChange(defaultDate);
     this.inComeDateChange(defaultDate);
+    this.pieDateChange(defaultDate);
+    this.outPieDateChange(defaultDate);
   },
   methods: {
     handleSetLineChartData(type) {
@@ -202,6 +242,35 @@ export default {
       }
       this.reqeustStockOutMoney(params);
     },
+    //入库饼图日期
+    pieDateChange(val) {
+      let params = {
+        beginDate: defaultDate[0],
+        endDate: defaultDate[1]
+      };
+      if (val && val.length) {
+        params = {
+          beginDate: val[0],
+          endDate: val[1]
+        };
+      }
+      this.reqeustPieData(params);
+    },
+    //出库饼图日期
+    outPieDateChange(val) {
+      let params = {
+        beginDate: defaultDate[0],
+        endDate: defaultDate[1]
+      };
+      if (val && val.length) {
+        params = {
+          beginDate: val[0],
+          endDate: val[1]
+        };
+      }
+      this.reqeustPieDataOut(params);
+    },
+
     //出库金额数据
     reqeustStockOutMoney(params) {
       stockOutMoney(params)
@@ -217,6 +286,24 @@ export default {
         .then(res => {
           console.log("入库数据===", res);
           this.lineChartData = res;
+        })
+        .catch(() => {});
+    },
+    //入库饼图数据
+    reqeustPieData(params) {
+      stockIn(params)
+        .then(res => {
+          console.log("入库数据===", res);
+          this.pieChartData = res;
+        })
+        .catch(() => {});
+    },
+    //出库饼图数据
+    reqeustPieDataOut(params) {
+      stockOut(params)
+        .then(res => {
+          console.log("出库并饼图数据===", res);
+          this.pieChartDataOut = res;
         })
         .catch(() => {});
     },
@@ -248,14 +335,16 @@ export default {
 
   .chart-wrapper {
     background: #fff;
-    padding: 16px 16px 0;
+    padding: 32px 16px 0;
     margin-bottom: 32px;
+    position: relative;
   }
 }
 
 @media (max-width: 1024px) {
   .chart-wrapper {
     padding: 8px;
+    position: relative;
   }
 }
 </style>

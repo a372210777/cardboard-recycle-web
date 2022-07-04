@@ -17,8 +17,13 @@
         >
           <el-table-column prop="id" label="物料编码" />
           <el-table-column prop="materialName" label="物料" />
-          <el-table-column prop="quantity" label="数量" />
+          <el-table-column prop="quantity" label="数量（kg）" />
           <el-table-column prop="unitPrice" label="单价（元）" />
+          <el-table-column label="总金额（元）">
+            <template slot-scope="scope">
+              {{ calcuteTotal(scope.row) }}
+            </template>
+          </el-table-column>
           <el-table-column prop="unit" label="单位" />
           <el-table-column prop="remark" label="备注" />
         </el-table>
@@ -90,6 +95,9 @@ export default {
     hideDialog() {
       this.dialogVisible = false;
       this.orderItems = [];
+    },
+    calcuteTotal(row) {
+      return (row.quantity * row.unitPrice).toFixed(3);
     }
   }
 };

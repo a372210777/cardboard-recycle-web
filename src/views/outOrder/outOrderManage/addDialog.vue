@@ -152,8 +152,13 @@
       <div>
         <el-table ref="table" :data="addData" size="small" style="width: 100%;">
           <el-table-column prop="materialName" label="物料名称" />
-          <el-table-column prop="quantity" label="数量" />
-          <el-table-column prop="unitPrice" label="单价" />
+          <el-table-column prop="quantity" label="数量（kg）" />
+          <el-table-column prop="unitPrice" label="单价（元）" />
+          <el-table-column v-if="!isPaper" label="总金额（元）">
+            <template slot-scope="scope">
+              {{ (scope.row.unitPrice * scope.row.quantity).toFixed(3) }}
+            </template>
+          </el-table-column>
           <el-table-column prop="unit" label="单位" />
           <el-table-column prop="warehouseName" label="仓库" />
           <el-table-column prop="stockOutTime" label="出库时间" />

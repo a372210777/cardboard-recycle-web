@@ -167,7 +167,7 @@
             {{ scope.row.material.name }}
           </template>
         </el-table-column>
-        <el-table-column prop="" label="数量">
+        <el-table-column prop="" label="数量(kg)">
           <template slot-scope="scope">
             {{ scope.row.quantity }}
           </template>
@@ -184,7 +184,11 @@
         </el-table-column>
         <el-table-column prop="" label="对账结果">
           <template slot-scope="scope">
-            {{ dict.label.statement_result[scope.row.statementResult] }}
+            <span
+              :class="scope.row.statementResult == 'abnormal' ? 'mark-red' : ''"
+            >
+              {{ dict.label.statement_result[scope.row.statementResult] }}
+            </span>
           </template>
         </el-table-column>
         <el-table-column prop="" label="备注">
@@ -371,4 +375,8 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.mark-red {
+  color: #ff4949;
+}
+</style>
