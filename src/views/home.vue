@@ -110,7 +110,7 @@
             <pie-chart title="出库物料分布" :chart-data="pieChartDataOut" />
           </div>
         </el-col>
-        <el-col :xs="24" :sm="24" :lg="8">
+        <!-- <el-col :xs="24" :sm="24" :lg="8">
           <div class="chart-wrapper">
             <radar-chart />
           </div>
@@ -120,7 +120,7 @@
           <div class="chart-wrapper">
             <bar-chart />
           </div>
-        </el-col>
+        </el-col> -->
       </el-row>
     </div>
   </div>
@@ -229,6 +229,7 @@ export default {
       }
       this.reqeustStockOut(params);
     },
+    //收入时间框
     inComeDateChange(val) {
       let params = {
         beginDate: defaultDate[0],
@@ -275,7 +276,6 @@ export default {
     reqeustStockOutMoney(params) {
       stockOutMoney(params)
         .then(res => {
-          console.log("出库金额数据===", res);
           this.inComeLineChartData = res;
         })
         .catch(() => {});
@@ -284,7 +284,6 @@ export default {
     reqeustStockIn(params) {
       stockIn(params)
         .then(res => {
-          console.log("入库数据===", res);
           this.lineChartData = res;
         })
         .catch(() => {});
@@ -293,7 +292,6 @@ export default {
     reqeustPieData(params) {
       stockIn(params)
         .then(res => {
-          console.log("入库数据===", res);
           this.pieChartData = res;
         })
         .catch(() => {});
@@ -302,7 +300,6 @@ export default {
     reqeustPieDataOut(params) {
       stockOut(params)
         .then(res => {
-          console.log("出库并饼图数据===", res);
           this.pieChartDataOut = res;
         })
         .catch(() => {});

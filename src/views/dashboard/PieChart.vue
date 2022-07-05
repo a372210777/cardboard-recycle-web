@@ -70,7 +70,6 @@ export default {
       this.setOptions(chartData);
     },
     generateChartData(data) {
-      console.log("generateChartData pie ", data);
       let obj = {};
       obj.legend = data.legendData || [];
       obj.data = [];

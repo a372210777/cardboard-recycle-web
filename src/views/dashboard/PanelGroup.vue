@@ -11,7 +11,7 @@
           </div>
           <count-to
             :start-val="0"
-            :end-val="102400"
+            :end-val="monthIn"
             :duration="2600"
             class="card-panel-num"
           />
@@ -29,7 +29,7 @@
           </div>
           <count-to
             :start-val="0"
-            :end-val="81212"
+            :end-val="monthOut"
             :duration="3000"
             class="card-panel-num"
           />
@@ -47,7 +47,7 @@
           </div>
           <count-to
             :start-val="0"
-            :end-val="9280"
+            :end-val="monthIncome"
             :duration="3200"
             class="card-panel-num"
           />
@@ -65,7 +65,7 @@
           </div>
           <count-to
             :start-val="0"
-            :end-val="13600"
+            :end-val="monthExpendicture"
             :duration="3600"
             class="card-panel-num"
           />
@@ -78,13 +78,125 @@
 <script>
 import CountTo from "vue-count-to";
 
+import { expenseStatics } from "@/api/report/expendictureStat";
+
+import { stockOutMoney, stockIn, stockOut } from "@/api/dashboard/index";
+const monthToDay = {
+  "01": "31",
+  "02": "28",
+  "03": "31",
+  "04": "30",
+  "05": "31",
+  "06": "30",
+  "07": "31",
+  "08": "31",
+  "09": "30",
+  "10": "31",
+  "11": "30",
+  "12": "31"
+};
+let year = new Date().getFullYear();
+let month = new Date().getMonth() + 1;
+if (String(month).length < 2) {
+  month = "0" + month;
+}
+let beginDate = `${year}-${month}-01`;
+let endDate = `${year}-${month}-${monthToDay[month]}`;
+
 export default {
   components: {
     CountTo
   },
+  data() {
+    return {
+      monthExpendicture: 0, //本月开销
+      monthIncome: 0, //本月收入
+      monthIn: 0, //当月入库
+      monthOut: 0 //当月出库
+    };
+  },
+  mounted() {
+    this.requestExpense();
+    this.reqeustStockOutMoney();
+    this.reqeustStockIn();
+    this.reqeustStockOut();
+  },
   methods: {
     handleSetLineChartData(type) {
       this.$emit("handleSetLineChartData", type);
+    },
+    //请求当月入库
+    reqeustStockIn() {
+      let params = {
+        beginDate: beginDate,
+        endDate: endDate
+      };
+      stockIn(params)
+        .then(res => {
+          let temp = 0;
+          (res.seriesData || []).forEach(arr => {
+            arr.forEach(ele => {
+              temp += ele;
+            });
+          });
+          console.log(res, temp);
+          this.monthIn = temp;
+        })
+        .catch(() => {});
+    },
+    //当月出库数据
+    reqeustStockOut() {
+      let params = {
+        beginDate: beginDate,
+        endDate: endDate
+      };
+      stockOut(params)
+        .then(res => {
+          let temp = 0;
+          (res.seriesData || []).forEach(arr => {
+            arr.forEach(ele => {
+              temp += ele;
+            });
+          });
+          this.monthOut = temp;
+        })
+        .catch(() => {});
+    },
+    //请求当月收入
+    reqeustStockOutMoney() {
+      let params = {
+        beginDate: beginDate,
+        endDate: endDate
+      };
+      stockOutMoney(params)
+        .then(res => {
+          let temp = 0;
+          (res.seriesData || []).forEach(arr => {
+            arr.forEach(ele => {
+              temp += ele;
+            });
+          });
+          this.monthIncome = temp;
+        })
+        .catch(() => {});
+    },
+
+    //请求当月开销
+    requestExpense() {
+      let params = {
+        beginDate: beginDate,
+        endDate: endDate,
+        reportType: "summary"
+      };
+      expenseStatics(params)
+        .then(res => {
+          let temp = 0;
+          (res || []).forEach(item => {
+            temp += item.money;
+          });
+          this.monthExpendicture = temp;
+        })
+        .catch(() => {});
     }
   }
 };
