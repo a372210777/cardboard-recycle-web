@@ -907,6 +907,10 @@ export default {
       this.addData = this.addData.filter(item => {
         return item.randomId != data.randomId;
       });
+      //物料删除后，删除对应质检单
+      this.checkData = this.checkData.filter(item => {
+        return item.material != data.material; //id
+      });
     },
     reset(formName) {
       this.$refs[formName].resetFields();

@@ -81,8 +81,6 @@
             </template>
           </el-table-column>
         </el-table>
-        <!--分页组件-->
-        <pagination />
         <span slot="footer" class="dialog-footer">
           <el-button :loading="loading" @click="cancel">取 消</el-button>
           <el-button type="primary" :loading="loading" @click="save"
@@ -95,34 +93,13 @@
 </template>
 <script>
 import crudBillReceipt from "@/api/billManage/billReceipt";
-import CRUD, { presenter, header, form, crud } from "@crud/crud";
-import rrOperation from "@crud/RR.operation";
-import crudOperation from "@crud/CRUD.operation";
-import udOperation from "@crud/UD.operation";
-import pagination from "@crud/Pagination";
-import { deepClone, debounce, dateFormat } from "@/utils/index";
-const defaultForm = {
-  id: null,
-  stockInOrderId: null,
-  materialId: null,
-  quantity: null,
-  unit: null,
-  remark: null
-};
+
+import { deepClone, dateFormat } from "@/utils/index";
+
 export default {
   name: "StockInOrderItem",
-  components: { pagination, crudOperation, rrOperation, udOperation },
+  components: {},
   dicts: ["statement_result", "material_category"],
-  mixins: [presenter(), header(), form(defaultForm), crud()],
-  cruds() {
-    return CRUD({
-      title: "入库单明细",
-      url: "api/stockInOrderItem",
-      idField: "id",
-      sort: "id,desc",
-      crudMethod: { ...crudBillReceipt }
-    });
-  },
   data() {
     return {
       yearMonth: "",
@@ -139,10 +116,6 @@ export default {
   },
   mounted() {},
   methods: {
-    // 钩子：在获取表格数据之前执行，false 则代表不获取数据
-    [CRUD.HOOK.beforeRefresh]() {
-      return true;
-    },
     show(data = []) {
       this.dialogVisible = true;
     },
@@ -242,28 +215,41 @@ export default {
           });
       }
       if (isOk) {
-        this.loading = true;
-        let year = new Date(this.yearMonth).getFullYear();
-        let month = new Date(this.yearMonth).getMonth() + 1;
-        let params = {
-          month: month,
-          statementItems: deepClone(this.tableData),
-          statementTime: dateFormat(new Date(), "yyyy-MM-dd"),
-          year: year
-        };
-        crudBillReceipt
-          .add(params)
-          .then(res => {
-            console.log(res);
-            this.loading = false;
-            this.dialogVisible = false;
-            this.tableData = [];
-            this.yearMonth = "";
-            this.$emit("saveSuccess");
+        let isConfirm = await this.$confirm(`确认保存对账记录?`, "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        })
+          .then(() => {
+            return true;
           })
           .catch(() => {
-            this.loading = false;
+            return false;
           });
+        if (isConfirm) {
+          this.loading = true;
+          let year = new Date(this.yearMonth).getFullYear();
+          let month = new Date(this.yearMonth).getMonth() + 1;
+          let params = {
+            month: month,
+            statementItems: deepClone(this.tableData),
+            statementTime: dateFormat(new Date(), "yyyy-MM-dd"),
+            year: year
+          };
+          crudBillReceipt
+            .add(params)
+            .then(res => {
+              console.log(res);
+              this.loading = false;
+              this.dialogVisible = false;
+              this.tableData = [];
+              this.yearMonth = "";
+              this.$emit("saveSuccess");
+            })
+            .catch(() => {
+              this.loading = false;
+            });
+        }
       }
     }
   }

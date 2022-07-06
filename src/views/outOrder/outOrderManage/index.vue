@@ -249,10 +249,7 @@ export default {
       size: 100
     };
     queryWarehouse(params).then(res => {
-      this.warehouseList = res.content;
-      if (this.warehouseList.length) {
-        this.formInline.warehouse = this.warehouseList[0].id;
-      }
+      this.warehouseList = res.content || [];
     });
   },
   methods: {

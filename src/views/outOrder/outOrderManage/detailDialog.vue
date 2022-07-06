@@ -119,35 +119,11 @@
   </div>
 </template>
 <script>
-import crudStockInOrderItem from "@/api/inOrder/inOrderManage/stockInOrderItem";
-import CRUD, { presenter, header, form, crud } from "@crud/crud";
-import rrOperation from "@crud/RR.operation";
-import crudOperation from "@crud/CRUD.operation";
-import udOperation from "@crud/UD.operation";
-import pagination from "@crud/Pagination";
-
 import { mapGetters } from "vuex";
-const defaultForm = {
-  id: null,
-  stockInOrderId: null,
-  materialId: null,
-  quantity: null,
-  unit: null,
-  remark: null
-};
 export default {
   name: "StockInOrderItem",
-  components: { pagination, crudOperation, rrOperation, udOperation },
-  mixins: [presenter(), header(), form(defaultForm), crud()],
-  cruds() {
-    return CRUD({
-      title: "入库单明细",
-      url: "api/stockInOrderItem",
-      idField: "id",
-      sort: "id,desc",
-      crudMethod: { ...crudStockInOrderItem }
-    });
-  },
+  components: {},
+
   data() {
     return {
       mode: "", //paper:纸类出库单 ，other:非纸类出库单
@@ -170,10 +146,6 @@ export default {
     }
   },
   methods: {
-    // 钩子：在获取表格数据之前执行，false 则代表不获取数据
-    [CRUD.HOOK.beforeRefresh]() {
-      return true;
-    },
     resetData() {
       this.checkData = [];
       this.orderItems = [];
