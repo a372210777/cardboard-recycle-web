@@ -131,6 +131,18 @@
         <el-table-column prop="money" label="总金额（元）" />
         <el-table-column prop="date" label="日期" />
       </el-table>
+      <!--分页组件-->
+      <el-pagination
+        @size-change="sizeChangeHandler"
+        @current-change="pageChangeHandler"
+        :current-page.sync="page.pageNumber"
+        style="margin-top: 8px;"
+        :page-sizes="[10, 20, 30, 40, 50, 100, 200, 500]"
+        :page-size="page.pageSize"
+        layout="total, prev, pager, next, sizes"
+        :total="page.total"
+      >
+      </el-pagination>
     </div>
   </div>
 </template>
@@ -143,7 +155,7 @@ import crudOperation from "@crud/CRUD.operation";
 import udOperation from "@crud/UD.operation";
 import pagination from "@crud/Pagination";
 import DateRangePicker from "@/components/DateRangePicker";
-import { dateFormat } from "@/utils/index";
+import { dateFormat, deepClone } from "@/utils/index";
 
 let endDate = new Date().getTime();
 let beginDate = endDate - 7 * 24 * 60 * 60 * 1000;
@@ -186,6 +198,11 @@ export default {
         reportType: "", //统计方式
         beginDate: beginDateStr,
         endDate: endDateStr
+      },
+      page: {
+        pageSize: 10,
+        pageNumber: 1,
+        total: 0
       }
     };
   },
@@ -231,14 +248,29 @@ export default {
     },
     queryData() {
       this.loading = true;
-      inAndOutOrderStatics(this.form)
+      let param = deepClone(this.form);
+      param.pageSize = this.page.pageSize;
+      param.pageNumber = this.page.pageNumber;
+      inAndOutOrderStatics(param)
         .then(res => {
-          this.tableData = res;
+          this.tableData = res.content;
+          this.page.total = res.totalElements;
           this.loading = false;
         })
         .catch(() => {
           this.loading = false;
         });
+    },
+    // 每页条数改变
+    sizeChangeHandler(e) {
+      this.page.pageSize = e;
+      this.page.pageNumber = 1;
+      this.queryData();
+    },
+    // 当前页改变
+    pageChangeHandler(e) {
+      this.page.pageNumber = e;
+      this.queryData();
     },
     reset() {
       this.date = [beginDateStr, endDateStr];

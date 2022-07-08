@@ -191,7 +191,7 @@ export default {
       expenseStatics(params)
         .then(res => {
           let temp = 0;
-          (res || []).forEach(item => {
+          (res.content || []).forEach(item => {
             temp += item.money;
           });
           this.monthExpendicture = temp;

@@ -81,6 +81,18 @@
         <el-table-column prop="money" label="开销总金额" />
         <el-table-column prop="date" label="开销日期" />
       </el-table>
+      <!--分页组件-->
+      <el-pagination
+        @size-change="sizeChangeHandler"
+        @current-change="pageChangeHandler"
+        :current-page.sync="page.pageNumber"
+        style="margin-top: 8px;"
+        :page-sizes="[10, 20, 30, 40, 50, 100, 200, 500]"
+        :page-size="page.pageSize"
+        layout="total, prev, pager, next, sizes"
+        :total="page.total"
+      >
+      </el-pagination>
     </div>
   </div>
 </template>
@@ -92,7 +104,7 @@ import crudOperation from "@crud/CRUD.operation";
 import udOperation from "@crud/UD.operation";
 import pagination from "@crud/Pagination";
 import DateRangePicker from "@/components/DateRangePicker";
-import { dateFormat } from "@/utils/index";
+import { dateFormat, deepClone } from "@/utils/index";
 
 let endDate = new Date().getTime();
 let beginDate = endDate - 7 * 24 * 60 * 60 * 1000;
@@ -119,6 +131,11 @@ export default {
         beginDate: beginDateStr,
         endDate: endDateStr,
         reportType: ""
+      },
+      page: {
+        pageSize: 10,
+        pageNumber: 1,
+        total: 0
       }
     };
   },
@@ -140,10 +157,13 @@ export default {
     },
     queryData() {
       this.loading = true;
-      expenseStatics(this.form)
+      let param = deepClone(this.form);
+      param.pageSize = this.page.pageSize;
+      param.pageNumber = this.page.pageNumber;
+      expenseStatics(param)
         .then(res => {
-          console.log(res);
-          this.tableData = res;
+          this.tableData = res.content;
+          this.page.total = res.totalElements;
           this.loading = false;
         })
         .catch(() => {
@@ -155,6 +175,17 @@ export default {
       this.date = [beginDateStr, endDateStr];
       this.form.beginDate = beginDateStr;
       this.form.endDate = endDateStr;
+    },
+    // 每页条数改变
+    sizeChangeHandler(e) {
+      this.page.pageSize = e;
+      this.page.pageNumber = 1;
+      this.queryData();
+    },
+    // 当前页改变
+    pageChangeHandler(e) {
+      this.page.pageNumber = e;
+      this.queryData();
     }
   }
 };
