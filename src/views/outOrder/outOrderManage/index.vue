@@ -50,7 +50,7 @@
           type="primary"
           icon="el-icon-plus"
           @click="showAddDialog('paper')"
-          >新建纸类出库单</el-button
+          >新建黄板纸出库单</el-button
         >
         <el-button
           slot="left"
@@ -59,7 +59,7 @@
           type="primary"
           icon="el-icon-plus"
           @click="showAddDialog('other')"
-          >新建金属类出库单</el-button
+          >新建非黄板纸出库单</el-button
         >
       </crudOperation>
       <!--表单组件-->

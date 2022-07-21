@@ -739,19 +739,19 @@ export default {
     isPaper() {
       return this.mode == "paper";
     },
-    //纸张类物料
+    //黄版类物料
     paperMaterialList() {
       return (
         this.materialList.filter(item => {
-          return item.category == "paper";
+          return item.name.indexOf("黄板") > -1;
         }) || []
       );
     },
-    //非纸张类物料
+    //非黄版张类物料
     notPaperMaterialList() {
       return (
         this.materialList.filter(item => {
-          return item.category != "paper";
+          return item.name.indexOf("黄板") == -1;
         }) || []
       );
     }
@@ -854,6 +854,8 @@ export default {
     showDialog(mode) {
       this.addDialogVisible = true;
       this.mode = mode;
+      this.reset("addForm");
+      this.reset("checkForm");
     },
     hideDialog() {
       this.addDialogVisible = false;
@@ -913,7 +915,9 @@ export default {
       });
     },
     reset(formName) {
-      this.$refs[formName].resetFields();
+      if (this.$refs[formName]) {
+        this.$refs[formName].resetFields();
+      }
     },
     //移除质检单附件
     removeCheckAttach() {

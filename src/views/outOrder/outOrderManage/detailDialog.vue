@@ -18,11 +18,6 @@
           style="width: 100%;"
         >
           <el-table-column prop="materialName" label="物料" />
-          <el-table-column label="物料编码">
-            <template slot-scope="scope">
-              {{ scope.row.id }}
-            </template>
-          </el-table-column>
           <el-table-column prop="quantity" label="数量（kg）" />
           <el-table-column prop="unitPrice" label="单价（元）" />
           <el-table-column
@@ -182,9 +177,9 @@ export default {
     //检查出库单类型
     checkOrderType(data = {}) {
       let temp = data.orderItems;
-      //如果有一个元素得物料类型是paper就是纸类出库单
+      //如果有一个元素得物料类型是paper就是黄板纸类出库单
       let result = temp.find(element => {
-        return element.material.category == "paper";
+        return element.material.name.indexOf("黄板") > -1;
       });
       if (result) {
         this.mode = "paper";
